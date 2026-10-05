@@ -1,3 +1,8 @@
+---
+name: clera
+description: "Candidate dashboard for the Clera account via the authenticated MCP server (mcp.getclera.com). Use when Demo asks about Clera applications, matches, or candidate-dashboard status."
+---
+
 # Clera MCP skill
 
 Candidate dashboard for Demo's Clera account (your-email@example.com,

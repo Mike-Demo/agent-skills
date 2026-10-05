@@ -1,3 +1,8 @@
+---
+name: github
+description: "Work with GitHub through the REST API (api.github.com) via a generic CLI proxy. Use when working with GitHub repos, issues, pull requests, or API data."
+---
+
 # GitHub skill
 
 Work with the user's GitHub account through the REST API (api.github.com), authenticated via the stored `custom.github` connector (dynamic credential surrogates — no raw token is ever handled).

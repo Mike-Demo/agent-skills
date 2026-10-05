@@ -1,3 +1,8 @@
+---
+name: indeed
+description: "Indeed MCP skill — currently BLOCKED: Indeed's MCP server is allowlisted to Claude's own connector clients. Do not use until the block is lifted."
+---
+
 # Indeed MCP skill
 
 ## Status: BLOCKED (2026-10-01)

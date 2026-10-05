@@ -1,6 +1,6 @@
 ---
 name: "beautiful-ai"
-description: "Build Beautiful.ai presentations: list themes/folders/decks, create decks from an outline or template, export to PDF/PPTX."
+description: "Build Beautiful.ai presentations: list themes/folders/decks, create decks from an outline or template, export to PDF/PPTX. Use when Demo asks to build or export a Beautiful.ai presentation."
 ---
 
 # Beautiful.ai

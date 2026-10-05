@@ -1,3 +1,8 @@
+---
+name: job-feeds
+description: "Unified job search sweep across three sources, merged and deduped for Demo's partnerships job search. Use when running the daily job sweep or a one-off multi-source search."
+---
+
 # job-feeds skill — the unified job search skill
 
 Three sources wired into one sweep for Demo's partnerships job search.

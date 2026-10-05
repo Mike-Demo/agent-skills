@@ -1,6 +1,6 @@
 ---
 name: job-description-analyzer
-description: Analyze job postings, calculate match scores, identify gaps, and create application strategy
+description: Analyze job postings, calculate match scores, identify gaps, and create application strategy. Use when Demo shares a job posting and wants a match assessment.
 ---
 
 # Job Description Analyzer

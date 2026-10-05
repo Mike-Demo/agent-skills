@@ -1,6 +1,6 @@
 ---
 name: application-form-filler
-description: Fill out job application form fields with context-aware, tailored answers drawn from the candidate's CV and the job description
+description: Fill out job application form fields with context-aware, tailored answers drawn from the candidate's CV and the job description. Use when filling out a job application form with Demo's details.
 ---
 
 # Application Form Filler

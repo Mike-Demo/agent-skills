@@ -1,6 +1,6 @@
 ---
 name: resume-tailor
-description: Customize resume for specific job postings while maintaining truthfulness
+description: Customize resume for specific job postings while maintaining truthfulness. Use when tailoring Demo's resume to a specific job posting.
 ---
 
 # Resume Tailor

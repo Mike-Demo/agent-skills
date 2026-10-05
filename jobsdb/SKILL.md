@@ -1,3 +1,8 @@
+---
+name: jobsdb
+description: "Free, unlimited manual job search against the public jobs_db Supabase (~178k US jobs). Use for one-off manual searches where you would otherwise spend finite JobsPipe credits; never as a replacement for JobsPipe signals."
+---
+
 # jobsdb skill
 
 Free, unlimited manual job search against the public jobs_db Supabase

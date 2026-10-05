@@ -1,6 +1,6 @@
 ---
 name: cover-letter-generator
-description: Create personalized, compelling cover letters from resume and job description
+description: Create personalized, compelling cover letters from resume and job description. Use when Demo asks for a cover letter for a specific role.
 ---
 
 # Cover Letter Generator
