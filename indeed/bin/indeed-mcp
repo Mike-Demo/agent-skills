@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Indeed MCP CLI — job search via Indeed's authenticated MCP server.
+
+Token storage: ~/.indeed-tokens.json under the skill dir (mode 600).
+Auto-refreshes the access token via the stored refresh_token.
+"""
+import json, os, sys, time, urllib.request, urllib.parse
+
+SKILL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TOKEN_PATH = os.path.join(SKILL_DIR, '.indeed-tokens.json')
+MCP_URL = 'https://mcp.indeed.com/claude/mcp'
+
+
+def load_tokens():
+    with open(TOKEN_PATH) as f:
+        return json.load(f)
+
+
+def save_tokens(t):
+    with open(TOKEN_PATH, 'w') as f:
+        json.dump(t, f)
+    os.chmod(TOKEN_PATH, 0o600)
+
+
+def refresh(t):
+    body = urllib.parse.urlencode({
+        'grant_type': 'refresh_token',
+        'refresh_token': t['refresh_token'],
+        'client_id': t['client_id'],
+    }).encode()
+    req = urllib.request.Request(t['token_url'], data=body,
+                                 headers={'Content-Type': 'application/x-www-form-urlencoded'})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        d = json.load(r)
+    t['access_token'] = d['access_token']
+    if 'refresh_token' in d:
+        t['refresh_token'] = d['refresh_token']
+    t['expires_at'] = int(time.time()) + int(d.get('expires_in', 3600)) - 60
+    save_tokens(t)
+    return t
+
+
+def token():
+    t = load_tokens()
+    if t.get('expires_at', 0) < time.time() + 30:
+        t = refresh(t)
+    return t['access_token']
+
+
+def mcp(method, params=None):
+    tok = token()
+    payload = {'jsonrpc': '2.0', 'id': 1, 'method': method}
+    if params is not None:
+        payload['params'] = params
+    # initialize first (server requires the handshake)
+    init = {'jsonrpc': '2.0', 'id': 0, 'method': 'initialize',
+            'params': {'protocolVersion': '2024-11-05', 'capabilities': {},
+                       'clientInfo': {'name': 'indeed-mcp-cli', 'version': '0.1.0'}}}
+    for p in (init, payload):
+        req = urllib.request.Request(
+            MCP_URL, data=json.dumps(p).encode(),
+            headers={'Content-Type': 'application/json',
+                     'Accept': 'application/json, text/event-stream',
+                     'Authorization': 'Bearer ' + tok})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            raw = r.read().decode()
+        if p is payload:
+            # strip SSE framing if present
+            lines = [l[5:].strip() for l in raw.splitlines() if l.startswith('data:')]
+            body = lines[-1] if lines else raw
+            d = json.loads(body)
+            if 'error' in d:
+                raise RuntimeError('MCP error: ' + json.dumps(d['error']))
+            return d.get('result')
+
+
+def cmd_list_tools():
+    r = mcp('tools/list')
+    for t in r.get('tools', []):
+        print(t['name'])
+        print('  ' + (t.get('description') or '')[:200])
+        schema = t.get('inputSchema', {})
+        for name, prop in (schema.get('properties') or {}).items():
+            req = 'required' if name in (schema.get('required') or []) else 'optional'
+            print(f'    - {name} ({req}): {(prop.get("description") or "")[:120]}')
+        print()
+
+
+def cmd_call(name, args):
+    r = mcp('tools/call', {'name': name, 'arguments': args})
+    for c in r.get('content', []):
+        if c.get('type') == 'text':
+            print(c['text'])
+        else:
+            print(json.dumps(c)[:2000])
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ('-h', '--help'):
+        print('usage: indeed-mcp list-tools | call <tool> <json-args>')
+        print('       indeed-mcp search --query Q [--location L] [--limit N]')
+        print('       indeed-mcp details --job-id ID')
+        print('       indeed-mcp resume | indeed-mcp company --name NAME')
+        sys.exit(0)
+    cmd = sys.argv[1]
+    if cmd == 'list-tools':
+        cmd_list_tools()
+    elif cmd == 'call':
+        cmd_call(sys.argv[2], json.loads(sys.argv[3] if len(sys.argv) > 3 else '{}'))
+    elif cmd == 'search':
+        import argparse
+        ap = argparse.ArgumentParser()
+        ap.add_argument('--query', required=True)
+        ap.add_argument('--location', default='')
+        ap.add_argument('--limit', type=int, default=10)
+        a = ap.parse_args(sys.argv[2:])
+        # tool name resolved from list-tools; override via env if it differs
+        tool = os.environ.get('INDEED_SEARCH_TOOL', 'search_jobs')
+        cmd_call(tool, {'query': a.query, 'location': a.location, 'limit': a.limit})
+    elif cmd == 'details':
+        import argparse
+        ap = argparse.ArgumentParser()
+        ap.add_argument('--job-id', required=True)
+        a = ap.parse_args(sys.argv[2:])
+        tool = os.environ.get('INDEED_DETAILS_TOOL', 'get_job_details')
+        cmd_call(tool, {'job_id': a.job_id})
+    elif cmd == 'resume':
+        tool = os.environ.get('INDEED_RESUME_TOOL', 'get_resume')
+        cmd_call(tool, {})
+    elif cmd == 'company':
+        import argparse
+        ap = argparse.ArgumentParser()
+        ap.add_argument('--name', required=True)
+        a = ap.parse_args(sys.argv[2:])
+        tool = os.environ.get('INDEED_COMPANY_TOOL', 'get_company_data')
+        cmd_call(tool, {'company_name': a.name})
+    else:
+        sys.exit('unknown command: ' + cmd)
+
+
+if __name__ == '__main__':
+    main()
