@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Call tools on Aikido's local MCP server (npx -y @aikidosec/mcp).
+
+The server speaks MCP over stdio. Auth is handled by the server itself:
+the first authenticated tool call returns one-time browser sign-in links
+(one per Aikido region). Open the link for your region, sign in, and the
+server caches the token for later calls. No raw key is handled here.
+
+Usage:
+  aikido-mcp tools/list
+  aikido-mcp tools/call <tool-name> '<json-args>'
+
+Prints the JSON-RPC result object.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+SERVER_CMD = ["npx", "-y", "@aikidosec/mcp"]
+TIMEOUT = 120
+
+
+class McpError(RuntimeError):
+    pass
+
+
+def spawn_server() -> subprocess.Popen:
+    npx = shutil.which("npx")
+    if not npx:
+        raise McpError("npx not found; install Node.js 18.19+ first")
+    env = dict(os.environ)
+    # Never log or print this env var; the server reads it directly.
+    proc = subprocess.Popen(
+        [npx, "-y", "@aikidosec/mcp"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        bufsize=1,
+        env=env,
+    )
+    return proc
+
+
+def rpc(proc: subprocess.Popen, method: str, params: dict | None = None,
+        req_id: int | None = 1) -> dict | None:
+    msg: dict = {"jsonrpc": "2.0", "method": method}
+    if params is not None:
+        msg["params"] = params
+    if req_id is not None:
+        msg["id"] = req_id
+    assert proc.stdin and proc.stdout
+    proc.stdin.write(json.dumps(msg) + "\n")
+    proc.stdin.flush()
+    if req_id is None:
+        return None  # notification: no response
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            raise McpError("MCP server closed stdout unexpectedly")
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            data = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if data.get("id") == req_id:
+            return data
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) < 1 or argv[0] not in ("tools/list", "tools/call"):
+        print("usage: aikido-mcp <tools/list|tools/call> [tool-name] [json-args]",
+              file=sys.stderr)
+        return 2
+    method = argv[0]
+    params: dict = {}
+    if method == "tools/call":
+        if len(argv) < 2:
+            print("usage: aikido-mcp tools/call <tool-name> [json-args]",
+                  file=sys.stderr)
+            return 2
+        params = {"name": argv[1],
+                  "arguments": json.loads(argv[2]) if len(argv) > 2 else {}}
+
+    proc = spawn_server()
+    try:
+        init = rpc(proc, "initialize", {
+            "protocolVersion": "2025-06-18",
+            "capabilities": {},
+            "clientInfo": {"name": "cane", "version": "1.0"},
+        }, req_id=1)
+        if not init or "result" not in init:
+            print(f"initialize failed: {init}", file=sys.stderr)
+            return 1
+        rpc(proc, "notifications/initialized", req_id=None)
+        resp = rpc(proc, method, params, req_id=2)
+    finally:
+        try:
+            proc.stdin.close()
+        except Exception:
+            pass
+        try:
+            proc.wait(timeout=5)
+        except Exception:
+            proc.kill()
+            proc.wait()
+
+    if resp is None or "error" in resp:
+        print(json.dumps(resp.get("error", {"message": "no response"}),
+                         indent=2), file=sys.stderr)
+        return 1
+    print(json.dumps(resp.get("result"), indent=2, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
