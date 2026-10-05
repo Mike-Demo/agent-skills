@@ -1,6 +1,6 @@
 # Clera MCP skill
 
-Candidate dashboard for Demo's Clera account (hey.demo@mikedemo.email,
+Candidate dashboard for Demo's Clera account (your-email@example.com,
 account kind: candidate) via the authenticated MCP server
 `https://mcp.getclera.com/mcp`.
 
