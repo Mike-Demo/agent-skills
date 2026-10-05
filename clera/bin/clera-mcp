@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Clera MCP CLI — candidate dashboard via Clera's authenticated MCP server.
+
+Token storage: .clera-tokens.json next to this skill (mode 600).
+Auto-refreshes via curl (urllib is unreliable against clerk.getclera.com).
+"""
+import json, os, subprocess, sys, time
+
+SKILL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TOKEN_PATH = os.path.join(SKILL_DIR, '.clera-tokens.json')
+MCP_URL = 'https://mcp.getclera.com/mcp'
+
+
+def load_tokens():
+    with open(TOKEN_PATH) as f:
+        return json.load(f)
+
+
+def save_tokens(t):
+    with open(TOKEN_PATH, 'w') as f:
+        json.dump(t, f)
+    os.chmod(TOKEN_PATH, 0o600)
+
+
+def refresh(t):
+    out = subprocess.run(
+        ['curl', '-s', '-m', '30', '-X', 'POST', t['token_url'],
+         '-H', 'Content-Type: application/x-www-form-urlencoded',
+         '--data-urlencode', 'grant_type=refresh_token',
+         '--data-urlencode', 'refresh_token=' + t['refresh_token'],
+         '--data-urlencode', 'client_id=' + t['client_id']],
+        capture_output=True, text=True, timeout=40).stdout
+    d = json.loads(out)
+    if 'access_token' not in d:
+        raise RuntimeError('refresh failed: ' + out[:300])
+    t['access_token'] = d['access_token']
+    if d.get('refresh_token'):
+        t['refresh_token'] = d['refresh_token']
+    t['expires_at'] = int(time.time()) + int(d.get('expires_in', 86400)) - 300
+    save_tokens(t)
+    return t
+
+
+def token():
+    t = load_tokens()
+    if t.get('expires_at', 0) < time.time() + 60:
+        t = refresh(t)
+    return t['access_token']
+
+
+def mcp(method, params=None):
+    tok = token()
+    results = []
+    for i, (m, p) in enumerate([('initialize', {'protocolVersion': '2024-11-05',
+            'capabilities': {}, 'clientInfo': {'name': 'clera-mcp-cli', 'version': '0.1.0'}}),
+                               (method, params or {})]):
+        payload = json.dumps({'jsonrpc': '2.0', 'id': i, 'method': m, 'params': p})
+        out = subprocess.run(
+            ['curl', '-s', '-m', '60', '-X', 'POST', MCP_URL,
+             '-H', 'Content-Type: application/json',
+             '-H', 'Accept: application/json, text/event-stream',
+             '-H', 'Authorization: Bearer ' + tok,
+             '-d', payload],
+            capture_output=True, text=True, timeout=70).stdout
+        datas = [l[5:].strip() for l in out.splitlines() if l.startswith('data:')]
+        if not datas:
+            raise RuntimeError('no SSE data in response: ' + out[:300])
+        results.append(json.loads(datas[-1]))
+    d = results[-1]
+    if 'error' in d:
+        raise RuntimeError('MCP error: ' + json.dumps(d['error']))
+    return d.get('result')
+
+
+def show(result):
+    for c in (result or {}).get('content', []):
+        if c.get('type') == 'text':
+            print(c['text'])
+        else:
+            print(json.dumps(c)[:3000])
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ('-h', '--help'):
+        print('usage: clera-mcp call <tool> [json-args]')
+        print('       clera-mcp whoami | matches | pipeline | roles [--query Q] | jobs [--query Q]')
+        print('       clera-mcp applications | saved | preferences | resumes | interviews')
+        sys.exit(0)
+    cmd = sys.argv[1]
+    rest = sys.argv[2:]
+    if cmd == 'call':
+        show(mcp('tools/call', {'name': rest[0],
+                                'arguments': json.loads(rest[1] if len(rest) > 1 else '{}')}))
+    elif cmd == 'whoami':
+        show(mcp('tools/call', {'name': 'whoami', 'arguments': {}}))
+    elif cmd == 'matches':
+        show(mcp('tools/call', {'name': 'listMatches', 'arguments': {}}))
+    elif cmd == 'pipeline':
+        show(mcp('tools/call', {'name': 'listMyPipeline', 'arguments': {}}))
+    elif cmd == 'roles':
+        args = {}
+        if rest and rest[0] == '--query':
+            args['query'] = rest[1]
+        show(mcp('tools/call', {'name': 'searchCleraRoles', 'arguments': args}))
+    elif cmd == 'jobs':
+        args = {}
+        if rest and rest[0] == '--query':
+            args['query'] = rest[1]
+        show(mcp('tools/call', {'name': 'searchJobs', 'arguments': args}))
+    elif cmd == 'applications':
+        show(mcp('tools/call', {'name': 'listApplications', 'arguments': {}}))
+    elif cmd == 'saved':
+        show(mcp('tools/call', {'name': 'listSavedJobs', 'arguments': {}}))
+    elif cmd == 'preferences':
+        show(mcp('tools/call', {'name': 'readPreferences', 'arguments': {}}))
+    elif cmd == 'resumes':
+        show(mcp('tools/call', {'name': 'listResumes', 'arguments': {}}))
+    elif cmd == 'interviews':
+        show(mcp('tools/call', {'name': 'listInterviewRequests', 'arguments': {}}))
+    else:
+        sys.exit('unknown command: ' + cmd)
+
+
+if __name__ == '__main__':
+    main()
