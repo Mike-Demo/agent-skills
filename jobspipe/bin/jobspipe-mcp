@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""Call a JobsPipe MCP tool over Streamable HTTP with the stored credential.
+
+Usage: jobspipe-mcp <tool-name> '<json-arguments>'
+Prints the tool result as JSON.
+"""
+import json
+import sys
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import add_surrogate_to_request, read_response_body
+
+MCP_URL = "https://mcp.jobspipe.dev/mcp"
+
+
+def parse_sse(raw: bytes) -> dict:
+    text = raw.decode("utf-8", "replace")
+    for line in text.splitlines():
+        if line.startswith("data:"):
+            payload = line[5:].strip()
+            if payload and payload != "[DONE]":
+                try:
+                    return json.loads(payload)
+                except json.JSONDecodeError:
+                    continue
+    # Fallback: maybe plain JSON
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        raise RuntimeError(f"unparseable MCP response: {text[:500]}")
+
+
+def main() -> int:
+    if len(sys.argv) != 3:
+        print(__doc__, file=sys.stderr)
+        return 2
+    tool, args_raw = sys.argv[1], sys.argv[2]
+    try:
+        arguments = json.loads(args_raw)
+    except json.JSONDecodeError as e:
+        print(f"bad JSON arguments: {e}", file=sys.stderr)
+        return 2
+
+    body = json.dumps({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {"name": tool, "arguments": arguments},
+    }).encode()
+
+    req = urllib.request.Request(
+        MCP_URL,
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/event-stream",
+        },
+        method="POST",
+    )
+    add_surrogate_to_request(req, "custom.jobspipe", allowed_hosts={"mcp.jobspipe.dev"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        raw = read_response_body(resp)
+    msg = parse_sse(raw)
+    if msg.get("error"):
+        print(json.dumps(msg["error"], indent=2), file=sys.stderr)
+        return 1
+    result = msg.get("result", {})
+    # MCP content blocks -> print text payloads
+    content = result.get("content", [])
+    texts = [b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text"]
+    if texts:
+        for t in texts:
+            print(t)
+    else:
+        print(json.dumps(result, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
