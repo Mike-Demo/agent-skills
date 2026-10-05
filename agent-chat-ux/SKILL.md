@@ -34,8 +34,7 @@ the user learns what each one means.
 
 Keep it small and consistent across every conversation:
 
-- **Progress:** `▰▰▰▱▱ 3/5` or emoji blocks `🟩🟩🟩⬜⬜` for multi-step work.
-  Text blocks render everywhere; emoji blocks read better on phones.
+- **Progress bars** — see the "Progress bars" section below for the full set.
 - **Status reactions** (react to the user's message, not just reply):
   - 👍 — received, starting on it (the universal "got it")
   - ⏳ or 🔄 — work in progress, still running
@@ -45,6 +44,37 @@ Keep it small and consistent across every conversation:
   - 💡 — suggestion or idea, not a result
 - **Message landmarks** in longer replies: 📋 plan, 🔍 findings, ⚠️ warning,
   🎯 decision needed, 📎 attachment, 🔗 link. Landmarks let the user skim.
+
+### Progress bars
+
+A progress bar answers "is it stuck?" at a glance. Pick one design and use it
+everywhere — consistency is what makes it scannable. Designs adapted from
+[Ben Smith's Emoji Progress Bar collection](https://bensomething.notion.site/4aa383a1dc2b4170aaf04a04825bd302).
+
+**Full bars** — always 10 segments: filled first, then empty, then the number.
+Ten segments keeps the math trivial (each one is 10%).
+
+- `🟦🟦🟦🟦🟦⬜️⬜️⬜️⬜️⬜️ 50%` — squares. Neutral and clean; the best default.
+- `🌝🌝🌝🌝🌝🌚🌚🌚🌚🌚 50%` — moons. Playful; fits a casual product.
+- `🌳🌳🌳🌳🌳🌱🌱🌱🌱🌱 50%` — growing trees. Nice for staged or growing work.
+- `😄😄😄😄😄😡😡😡😡😡 50%` — faces. Use sparingly: the 😡 reads as failure,
+  not "empty", which confuses the message.
+
+**Simple bars** — filled units only, no empty track. Compact, good for tight
+spaces:
+
+- `⭐️⭐️⭐️⭐️⭐️ 50%`
+- `▰▰▰▱▱ 3/5` — text blocks; these render everywhere, including plain-text
+  clients where emoji may not.
+
+**Done state:** when the work finishes, retire the bar and use a single ✅ —
+`✅ Nightly sync complete — 12,408 records, 0 errors`. The bar means
+in-progress; the checkmark means done.
+
+Rules of thumb: update at milestones (extract → transform → load → verify),
+not on a timer. If the platform lets you edit a message in place, update one
+message instead of sending five. Never stack multiple reactions on one bar
+update — one signal per moment.
 
 ### Restraint and accessibility
 
