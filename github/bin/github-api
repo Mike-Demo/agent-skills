@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Call the GitHub REST API as the user.
+
+Usage:
+  github-api GET /user
+  github-api GET /user/repos --paginate
+  github-api GET /repos/OWNER/REPO/pulls --paginate
+  github-api POST /repos/OWNER/REPO/issues --data '{"title":"...","body":"..."}'
+  github-api GET /search/code -q 'q=TODO+repo:OWNER/REPO'
+
+Auth uses the stored custom.github connector via dynamic credential
+surrogates; no raw token is ever handled here.
+
+Options:
+  -d, --data JSON     JSON request body (for POST/PATCH/PUT)
+  -q, --query EXTRA   extra query string appended to the path (repeatable),
+                      e.g. -q state=open -q per_page=100
+  --paginate          follow Link: rel="next" and merge list responses
+  --raw               print the raw response body instead of pretty JSON
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+import urllib.parse
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import (  # noqa: E402
+    add_surrogate_to_request,
+    read_response_body,
+)
+
+API_HOST = "api.github.com"
+BASE = f"https://{API_HOST}"
+CREDENTIAL_NAME = "custom.github"
+ALLOWED_HOSTS = [API_HOST]
+TIMEOUT = 60
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Call the GitHub REST API")
+    p.add_argument("method", help="HTTP method, e.g. GET, POST, PATCH")
+    p.add_argument("path", help="API path, e.g. /user/repos")
+    p.add_argument("-d", "--data", default=None, help="JSON request body")
+    p.add_argument("-q", "--query", action="append", default=[],
+                   help="extra query param, e.g. state=open (repeatable)")
+    p.add_argument("--paginate", action="store_true",
+                   help="follow Link rel=next and merge list responses")
+    p.add_argument("--raw", action="store_true",
+                   help="print raw response body instead of pretty JSON")
+    return p.parse_args(argv)
+
+
+def build_url(path: str, extra: list[str]) -> str:
+    url = path if path.startswith("http") else BASE + path
+    if extra:
+        sep = "&" if "?" in url else "?"
+        url += sep + "&".join(extra)
+    return url
+
+
+def do_request(url: str, method: str, body: bytes | None) -> tuple[int, dict, bytes]:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "muse-assistant-github-skill",
+    }
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(url, data=body, method=method.upper(), headers=headers)
+    add_surrogate_to_request(req, CREDENTIAL_NAME, allowed_hosts=ALLOWED_HOSTS)
+    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        return resp.status, dict(resp.headers), read_response_body(resp)
+
+
+def next_link(headers: dict) -> str | None:
+    link = headers.get("Link") or headers.get("link") or ""
+    m = re.search(r'<([^>]+)>\s*;\s*rel="next"', link)
+    return m.group(1) if m else None
+
+
+def main(argv: list[str]) -> int:
+    args = parse_args(argv)
+    body = args.data.encode("utf-8") if args.data else None
+    url = build_url(args.path, args.query)
+
+    try:
+        pages: list = []
+        while True:
+            status, headers, raw = do_request(url, args.method, body)
+            if args.raw or args.method.upper() in ("POST", "PATCH", "PUT", "DELETE") or not args.paginate:
+                # single response: print and stop
+                text = raw.decode("utf-8", errors="replace")
+                if args.raw:
+                    print(text)
+                else:
+                    try:
+                        print(json.dumps(json.loads(text), indent=2, ensure_ascii=False))
+                    except json.JSONDecodeError:
+                        print(text)
+                return 0
+            # paginated GET: accumulate list items
+            data = json.loads(raw.decode("utf-8"))
+            items = data if isinstance(data, list) else data.get("items", [])
+            pages.extend(items if isinstance(items, list) else [items])
+            nxt = next_link(headers)
+            if not nxt:
+                break
+            url, body = nxt, None
+        print(json.dumps(pages, indent=2, ensure_ascii=False))
+        print(f"github-api: {len(pages)} items across pages", file=sys.stderr)
+        return 0
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:2000]
+        print(f"github-api: HTTP {exc.code} {exc.reason}\n{detail}", file=sys.stderr)
+        return 1
+    except Exception as exc:  # noqa: BLE001
+        print(f"github-api: request failed: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
