@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+"""Unified job search across the three sources wired into this skill.
+
+- RSS (bin/rss-scan): Remotive + We Work Remotely public feeds. Free, always on.
+- Rezi (../rezi/bin/rezi-mcp search_jobs): Rezi's job board. Free reads, on by
+  default; degrades gracefully if the backend errors.
+- Jobspipe (../jobspipe/bin/jobspipe-search): 1 credit per new job returned,
+  quota NEVER refills. OFF unless --jobspipe is passed. The primary Jobspipe
+  channel is the live signals -> Outlook alert emails (read by the Daily Job
+  Sweep); manual search here is fallback-only.
+
+Usage:
+    bin/job-search [--seen PATH] [--max-age-days N] [--jobspipe]
+                   [--jobspipe-limit N] [--rezi-roles "a,b"] [--no-rss] [--no-rezi]
+
+Stdout: one JSON array of NEW items (deduped against the seen file), each:
+    {source, title, company, url, published, location, salary}
+--seen PATH defaults to <this-dir>/.job-search-seen.json (created if missing).
+Per-source seen state: rss-scan manages its own companion file (<seen>.rss).
+Stderr carries per-source warnings; exit 1 only if every enabled source failed.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SKILLS = os.path.dirname(os.path.dirname(HERE))  # ~/workspace/skills
+RSS_SCAN = os.path.join(HERE, "rss-scan")
+REZI_MCP = os.path.join(SKILLS, "rezi", "bin", "rezi-mcp")
+JOBSPIPE_SEARCH = os.path.join(SKILLS, "jobspipe", "bin", "jobspipe-search")
+
+DEFAULT_REZI_ROLES = [
+    "Head of Partnerships",
+    "Director of Partnerships",
+    "VP Partnerships",
+    "Head of Alliances",
+    "Director of Alliances",
+]
+
+TRACKING_PARAMS = {"utm_source", "utm_medium", "utm_campaign", "utm_term",
+                   "utm_content", "gclid", "fbclid", "mc_cid", "mc_eid"}
+
+
+def norm_url(u: str) -> str:
+    if not u:
+        return ""
+    try:
+        p = urlsplit(u.strip())
+        q = [(k, v) for k, v in parse_qsl(p.query) if k.lower() not in TRACKING_PARAMS]
+        netloc = p.netloc.lower()
+        if netloc.startswith("www."):
+            netloc = netloc[4:]
+        path = p.path.rstrip("/") or "/"
+        return urlunsplit((p.scheme.lower(), netloc, path, urlencode(q), ""))
+    except Exception:
+        return u.strip().lower().rstrip("/")
+
+
+def load_seen(path: str) -> set:
+    try:
+        with open(path) as f:
+            return set(json.load(f))
+    except (OSError, ValueError):
+        return set()
+
+
+def save_seen(path: str, seen: set) -> None:
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(sorted(seen), f)
+    os.replace(tmp, path)
+
+
+def run(cmd: list[str], timeout: int = 120) -> tuple[int, str, str]:
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return p.returncode, p.stdout, p.stderr
+    except Exception as exc:  # noqa: BLE001
+        return 99, "", str(exc)
+
+
+def collect_rss(seen_path: str, max_age_days: int) -> tuple[list[dict], str | None]:
+    rc, out, err = run([sys.executable, RSS_SCAN, "--seen", seen_path,
+                        "--max-age-days", str(max_age_days)])
+    if err.strip():
+        print(f"rss: {err.strip()}", file=sys.stderr)
+    if rc not in (0, 1):
+        return [], f"rss-scan failed (rc={rc})"
+    items = []
+    try:
+        for it in json.loads(out or "[]"):
+            items.append({
+                "source": "rss:" + it.get("source", "feed"),
+                "title": it.get("title"),
+                "company": it.get("company") or "",
+                "url": it.get("url"),
+                "published": it.get("published"),
+                "location": "",
+                "salary": None,
+            })
+    except ValueError:
+        return [], "rss-scan returned unparsable JSON"
+    if rc == 1 and not items:
+        return [], "every RSS feed failed"
+    return items, None
+
+
+REZI_ENTRY = re.compile(
+    r"^### \d+\.\s+(?P<title>.+?)\s+[—–-]\s+(?P<company>.+?)\s*\n"
+    r"\*\*Job ID:\*\*.*?\n"
+    r"\*\*Location:\*\*\s*(?P<location>.*?)\s*\|\s*\*\*Posted:\*\*\s*(?P<posted>.*?)\s*\n"
+    r"\*\*Apply:\*\*\s*(?P<url>\S+)",
+    re.MULTILINE,
+)
+
+
+def parse_rezi_date(s: str) -> str | None:
+    s = (s or "").strip()
+    for fmt in ("%b %d, %Y", "%B %d, %Y"):
+        try:
+            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc).isoformat()
+        except ValueError:
+            continue
+    return None
+
+
+def collect_rezi(roles: list[str], max_age_days: int) -> tuple[list[dict], str | None]:
+    items, cutoff = [], datetime.now(timezone.utc) - timedelta(days=max_age_days)
+    failures = 0
+    for role in roles:
+        rc, out, err = run([sys.executable, REZI_MCP, "tools/call", "search_jobs",
+                            json.dumps({"role": role, "location": "United States",
+                                        "remote": True})])
+        if rc != 0:
+            failures += 1
+            print(f"rezi: search_jobs failed for {role!r}: {err.strip()[:200]}",
+                  file=sys.stderr)
+            continue
+        try:
+            text = json.loads(out)["content"][0]["text"]
+        except (ValueError, KeyError, IndexError, TypeError):
+            failures += 1
+            continue
+        for m in REZI_ENTRY.finditer(text):
+            pub = parse_rezi_date(m.group("posted"))
+            if pub and datetime.fromisoformat(pub) < cutoff:
+                continue
+            items.append({
+                "source": "rezi",
+                "title": m.group("title").strip(),
+                "company": m.group("company").strip(),
+                "url": m.group("url").strip(),
+                "published": pub,
+                "location": m.group("location").strip(),
+                "salary": None,
+            })
+    if failures == len(roles):
+        return [], "Rezi search_jobs failed for every role"
+    # rezi returns 10/page; first page is enough for a sweep
+    return items, None
+
+
+def collect_jobspipe(limit: int, max_age_days: int) -> tuple[list[dict], str | None]:
+    print("jobspipe: manual search burns 1 credit per new job (quota never "
+          "refills); signals-via-email remain the primary channel.",
+          file=sys.stderr)
+    cmd = [sys.executable, JOBSPIPE_SEARCH,
+           "--title", "Head of Partnerships",
+           "--title", "Director of Partnerships",
+           "--title", "VP Partnerships",
+           "--title", "Head of Alliances",
+           "--title", "Director of Alliances",
+           "--remote", "--country", "US",
+           "--min-salary-usd", "130000",
+           "--limit", str(limit)]
+    if max_age_days > 0:
+        cmd += ["--max-age-days", str(max_age_days)]
+    rc, out, err = run(cmd, timeout=180)
+    if err.strip():
+        print(f"jobspipe: {err.strip()}", file=sys.stderr)
+    if rc != 0:
+        return [], "jobspipe-search failed"
+    items = []
+    for line in out.splitlines():
+        try:
+            j = json.loads(line)
+        except ValueError:
+            continue
+        sal = j.get("salary") or {}
+        salary = None
+        if sal.get("min_usd") or sal.get("max_usd"):
+            salary = f"${sal.get('min_usd') or '?'} - ${sal.get('max_usd') or '?'}"
+        elif sal.get("string"):
+            salary = sal["string"]
+        items.append({
+            "source": "jobspipe",
+            "title": j.get("title"),
+            "company": j.get("company"),
+            "url": j.get("apply_url"),
+            "published": j.get("date_posted"),
+            "location": j.get("location"),
+            "salary": salary,
+            "ghost_score": j.get("ghost_score"),
+        })
+    return items, None
+
+
+def main(argv: list[str]) -> int:
+    p = argparse.ArgumentParser(description="Unified job search: RSS + Rezi (+ Jobspipe opt-in)")
+    p.add_argument("--seen", default=os.path.join(HERE, ".job-search-seen.json"))
+    p.add_argument("--max-age-days", type=int, default=3)
+    p.add_argument("--no-rss", action="store_true")
+    p.add_argument("--no-rezi", action="store_true")
+    p.add_argument("--rezi-roles", default=",".join(DEFAULT_REZI_ROLES))
+    p.add_argument("--jobspipe", action="store_true",
+                   help="Include a manual Jobspipe search (burns credits; fallback only)")
+    p.add_argument("--jobspipe-limit", type=int, default=25)
+    args = p.parse_args(argv)
+
+    seen = load_seen(args.seen)
+    merged: dict[str, dict] = {}
+    errors: list[str] = []
+
+    if not args.no_rss:
+        items, err = collect_rss(args.seen + ".rss", args.max_age_days)
+        if err:
+            errors.append(err)
+        for it in items:
+            merged.setdefault(norm_url(it["url"] or ""), it)
+
+    if not args.no_rezi:
+        roles = [r.strip() for r in args.rezi_roles.split(",") if r.strip()]
+        items, err = collect_rezi(roles, args.max_age_days)
+        if err:
+            errors.append(err)
+        for it in items:
+            merged.setdefault(norm_url(it["url"] or ""), it)
+
+    if args.jobspipe:
+        items, err = collect_jobspipe(args.jobspipe_limit, args.max_age_days)
+        if err:
+            errors.append(err)
+        for it in items:
+            merged.setdefault(norm_url(it["url"] or ""), it)
+
+    enabled = (0 if args.no_rss else 1) + (0 if args.no_rezi else 1) + (1 if args.jobspipe else 0)
+    if enabled and len(errors) >= enabled and not merged:
+        print("job-search: every enabled source failed: " + "; ".join(errors),
+              file=sys.stderr)
+        return 1
+
+    fresh = []
+    for key, it in merged.items():
+        if key and key not in seen:
+            fresh.append(it)
+            seen.add(key)
+    save_seen(args.seen, seen)
+    print(json.dumps(fresh, indent=2, ensure_ascii=False))
+    if errors:
+        print("job-search warnings: " + "; ".join(errors), file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
