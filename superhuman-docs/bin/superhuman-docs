@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""Superhuman Docs (Coda API v1) CLI. Credential: custom.superhuman-docs via authd surrogate."""
+import argparse
+import json
+import sys
+import time
+import urllib.parse
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+import dynamic_credentials as dc
+
+BASE = "https://coda.io/apis/v1"
+CRED = "custom.superhuman-docs"
+ALLOWED = ["coda.io", "docs.superhuman.com"]
+
+
+def req(method, path, body=None, query=None):
+    url = BASE + path
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+    data = json.dumps(body).encode() if body is not None else None
+    r = urllib.request.Request(url, data=data, method=method)
+    r.add_header("Content-Type", "application/json")
+    dc.add_surrogate_to_request(r, CRED, allowed_hosts=ALLOWED)
+    resp = urllib.request.urlopen(r, timeout=60)
+    return dc.read_json_response(resp)
+
+
+def resolve_doc(doc):
+    """Accept a browser URL, a doc id, or a doc name; return the doc id."""
+    m = None
+    if "_d" in doc:
+        import re
+        m = re.search(r"_d([A-Za-z0-9_-]+)", doc)
+    if m:
+        return m.group(1)
+    return doc
+
+
+def cmd_whoami(_):
+    print(json.dumps(req("GET", "/whoami"), indent=2))
+
+
+def cmd_docs(args):
+    try:
+        out = req("GET", "/docs", query={"limit": args.limit} if args.limit else None)
+    except urllib.error.HTTPError as e:
+        if e.code == 403:
+            raise SystemExit(
+                "Doc listing is forbidden: this API token is scoped to specific docs. "
+                "Pass a docs.superhuman.com doc URL (or bare doc id) to pages/tables/rows instead."
+            )
+        raise
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return
+    for d in out.get("items", []):
+        print(f'{d["id"]}\t{d["name"]}\t{d["browserLink"]}')
+
+
+def cmd_pages(args):
+    doc = resolve_doc(args.doc)
+    out = req("GET", f"/docs/{doc}/pages")
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return
+    for p in out.get("items", []):
+        print(f'{p["id"]}\t{p["name"]}\t{p.get("browserLink", "")}')
+
+
+def cmd_page(args):
+    """Export a page's canvas as markdown."""
+    doc = resolve_doc(args.doc)
+    job = req("POST", f"/docs/{doc}/pages/{args.page}/export", body={"outputFormat": "markdown"})
+    status_url = job["href"]
+    for _ in range(30):
+        st = req("GET", status_url.replace(BASE, ""))
+        if st.get("status") == "complete":
+            durl = st["downloadLink"]
+            req2 = urllib.request.Request(durl)
+            print(urllib.request.urlopen(req2, timeout=60).read().decode())
+            return
+        time.sleep(2)
+    raise SystemExit("page export did not complete in time")
+
+
+def cmd_tables(args):
+    doc = resolve_doc(args.doc)
+    out = req("GET", f"/docs/{doc}/tables")
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return
+    for t in out.get("items", []):
+        print(f'{t["id"]}\t{t["name"]}\t{t.get("browserLink", "")}')
+
+
+def cmd_columns(args):
+    doc = resolve_doc(args.doc)
+    out = req("GET", f"/docs/{doc}/tables/{args.table}/columns")
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return
+    for c in out.get("items", []):
+        print(f'{c["id"]}\t{c["name"]}\t{c.get("formula", "")}')
+
+
+def cmd_rows(args):
+    doc = resolve_doc(args.doc)
+    q = {}
+    if args.query:
+        q["query"] = args.query
+    if args.limit:
+        q["limit"] = args.limit
+    out = req("GET", f"/docs/{doc}/tables/{args.table}/rows", query=q)
+    if args.json:
+        print(json.dumps(out, indent=2))
+        return
+    for r in out.get("items", []):
+        vals = {k: v.get("value", v) for k, v in (r.get("values") or {}).items()}
+        print(json.dumps(vals))
+
+
+def main():
+    p = argparse.ArgumentParser(prog="superhuman-docs")
+    sub = p.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("whoami").set_defaults(f=cmd_whoami)
+    d = sub.add_parser("docs"); d.add_argument("--limit", type=int); d.add_argument("--json", action="store_true"); d.set_defaults(f=cmd_docs)
+    pg = sub.add_parser("pages"); pg.add_argument("doc"); pg.add_argument("--json", action="store_true"); pg.set_defaults(f=cmd_pages)
+    pe = sub.add_parser("page"); pe.add_argument("doc"); pe.add_argument("page"); pe.set_defaults(f=cmd_page)
+    t = sub.add_parser("tables"); t.add_argument("doc"); t.add_argument("--json", action="store_true"); t.set_defaults(f=cmd_tables)
+    c = sub.add_parser("columns"); c.add_argument("doc"); c.add_argument("table"); c.add_argument("--json", action="store_true"); c.set_defaults(f=cmd_columns)
+    r = sub.add_parser("rows"); r.add_argument("doc"); r.add_argument("table"); r.add_argument("--query"); r.add_argument("--limit", type=int); r.add_argument("--json", action="store_true"); r.set_defaults(f=cmd_rows)
+    args = p.parse_args()
+    args.f(args)
+
+
+if __name__ == "__main__":
+    main()
