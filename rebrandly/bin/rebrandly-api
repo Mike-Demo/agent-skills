@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Call the Rebrandly REST API (https://api.rebrandly.com/v1).
+
+Usage:
+  rebrandly-api account
+  rebrandly-api domains
+  rebrandly-api links [--limit N]
+  rebrandly-api create-link <destination> [--domain-id ID] [--slashtag TAG] [--title TITLE]
+
+Auth uses the stored custom.rebrandly connector via dynamic credential
+surrogates; no raw key is handled here.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import urllib.request
+import urllib.parse
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import (  # noqa: E402
+    add_surrogate_to_request,
+    read_json_response,
+)
+
+BASE_URL = "https://api.rebrandly.com/v1"
+CREDENTIAL_NAME = "custom.rebrandly"
+ALLOWED_HOSTS = ["api.rebrandly.com"]
+TIMEOUT = 60
+
+
+def request(method: str, path: str, body: dict | None = None, query: dict | None = None):
+    url = BASE_URL + path
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+    data = json.dumps(body).encode("utf-8") if body is not None else None
+    req = urllib.request.Request(url, data=data, method=method)
+    if data:
+        req.add_header("Content-Type", "application/json")
+    add_surrogate_to_request(req, CREDENTIAL_NAME, allowed_hosts=ALLOWED_HOSTS)
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+            return read_json_response(resp)
+    except urllib.error.HTTPError as e:
+        try:
+            detail = e.read().decode("utf-8", errors="replace")[:1000]
+        except Exception:
+            detail = ""
+        raise SystemExit(f"HTTP {e.code} on {method} {path}: {detail}")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("account")
+    sub.add_parser("domains")
+
+    p_links = sub.add_parser("links")
+    p_links.add_argument("--limit", type=int, default=25)
+
+    p_create = sub.add_parser("create-link")
+    p_create.add_argument("destination")
+    p_create.add_argument("--domain-id", default=None)
+    p_create.add_argument("--slashtag", default=None)
+    p_create.add_argument("--title", default=None)
+
+    args = ap.parse_args()
+
+    if args.cmd == "account":
+        print(json.dumps(request("GET", "/account"), indent=1))
+    elif args.cmd == "domains":
+        print(json.dumps(request("GET", "/domains"), indent=1))
+    elif args.cmd == "links":
+        print(json.dumps(request("GET", "/links", query={"limit": args.limit, "orderBy": "createdAt", "orderDir": "desc"}), indent=1))
+    elif args.cmd == "create-link":
+        payload: dict = {"destination": args.destination}
+        if args.domain_id:
+            payload["domain"] = {"id": args.domain_id}
+        if args.slashtag:
+            payload["slashtag"] = args.slashtag
+        if args.title:
+            payload["title"] = args.title
+        print(json.dumps(request("POST", "/links", body=payload), indent=1))
+
+
+if __name__ == "__main__":
+    main()
