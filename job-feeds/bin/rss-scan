@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""Scan Remotive and We Work Remotely public RSS feeds for partnerships leadership roles.
+
+Both publishers offer these feeds explicitly for aggregation (see their RSS pages).
+Usage:
+    rss-scan [--seen PATH] [--max-age-days N]
+Stdout: JSON array of NEW matches (deduped against the seen file).
+Stderr: per-feed warnings. Exit 0 unless every feed failed.
+Seen file: JSON list of posting URLs already handled (created if missing).
+"""
+
+import json
+import re
+import sys
+import urllib.request
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
+
+FEEDS = [
+    # Main feeds carry only the most recent N postings, so also pull the
+    # categories where partnerships leadership roles usually appear.
+    ("remotive", [
+        "https://remotive.com/remote-jobs/feed",
+        "https://remotive.com/feed",
+    ]),
+    ("remotive-sales", ["https://remotive.com/remote-jobs/feed/sales"]),
+    ("remotive-marketing", ["https://remotive.com/remote-jobs/feed/marketing"]),
+    ("remotive-product", ["https://remotive.com/remote-jobs/feed/product"]),
+    ("wwr", [
+        "https://weworkremotely.com/remote-jobs.rss",
+    ]),
+    ("wwr-sales-marketing", [
+        "https://weworkremotely.com/categories/remote-sales-and-marketing-jobs.rss",
+    ]),
+    ("wwr-management-finance", [
+        "https://weworkremotely.com/categories/remote-management-and-finance-jobs.rss",
+    ]),
+]
+
+UA = {"User-Agent": "Mozilla/5.0 (compatible; DemoJobFeed/1.0; +https://mikedemo.com)"}
+TIMEOUT = 30
+
+SENIORITY_RE = re.compile(
+    r"\b(head|director|vp|v\.p\.|vice[\s\-]?president|svp|evp|chief)\b", re.I
+)
+CORE_TOPIC_RE = re.compile(
+    r"\b(partner|partners|partnership|partnerships|alliance|alliances)\b", re.I
+)
+# Adjacent functions Demo is also open to: channel, ecosystem, business development.
+ADJACENT_TOPIC_RE = re.compile(
+    r"\b(channel|channels|ecosystem|ecosystems|business[\s\-]?development|biz[\s\-]?dev)\b",
+    re.I,
+)
+# Exclude obvious non-fits even when the title matches loosely.
+EXCLUDE_RE = re.compile(
+    r"\b(intern|internship|junior|associate|assistant|coordinator)\b", re.I
+)
+
+
+def fetch(url):
+    req = urllib.request.Request(url, headers=UA)
+    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        return resp.read()
+
+
+def get_feed_xml(source, urls):
+    last_err = None
+    for url in urls:
+        try:
+            return fetch(url), None
+        except Exception as e:  # noqa: BLE001 - report, don't crash
+            last_err = f"{url}: {e}"
+    return None, last_err
+
+
+def parse_items(xml_bytes):
+    root = ET.fromstring(xml_bytes)
+    items = []
+    for item in root.iter("item"):
+        def text(tag):
+            el = item.find(tag)
+            return (el.text or "").strip() if el is not None and el.text else ""
+        items.append({
+            "title": text("title"),
+            "url": text("link"),
+            "published": text("pubDate"),
+            "description": text("description"),
+        })
+    return items
+
+
+def guess_company(title):
+    for sep in (" at ", " @ ", " — ", " - "):
+        if sep in title:
+            parts = title.split(sep)
+            # WWR style is usually "<role> at <company>" or "<company>: <role>"
+            if sep == " at " or sep == " @ ":
+                return parts[-1].strip()
+    if ": " in title:
+        head, tail = title.split(": ", 1)
+        if len(head) < 60:
+            return head.strip()
+    return ""
+
+
+def pub_within(pub_str, max_age):
+    if not pub_str:
+        return True  # keep items with no date; worker triages
+    try:
+        dt = parsedate_to_datetime(pub_str)
+    except Exception:  # noqa: BLE001
+        return True
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - dt <= timedelta(days=max_age)
+
+
+def is_match(title):
+    """Return 'core', 'adjacent', or '' for a job title."""
+    if EXCLUDE_RE.search(title):
+        return ""
+    if not SENIORITY_RE.search(title):
+        return ""
+    if CORE_TOPIC_RE.search(title):
+        return "core"
+    if ADJACENT_TOPIC_RE.search(title):
+        return "adjacent"
+    return ""
+
+
+def main():
+    seen_path = None
+    max_age = 3
+    args = sys.argv[1:]
+    i = 0
+    while i < len(args):
+        if args[i] == "--seen" and i + 1 < len(args):
+            seen_path = args[i + 1]
+            i += 2
+        elif args[i] == "--max-age-days" and i + 1 < len(args):
+            max_age = int(args[i + 1])
+            i += 2
+        else:
+            i += 1
+
+    seen = set()
+    if seen_path:
+        try:
+            with open(seen_path) as f:
+                seen = set(json.load(f))
+        except FileNotFoundError:
+            pass
+        except Exception as e:  # noqa: BLE001
+            print(f"warning: could not read seen file: {e}", file=sys.stderr)
+
+    matches = []
+    failures = 0
+    for source, urls in FEEDS:
+        xml_bytes, err = get_feed_xml(source, urls)
+        if xml_bytes is None:
+            print(f"warning: feed failed [{source}] {err}", file=sys.stderr)
+            failures += 1
+            continue
+        try:
+            items = parse_items(xml_bytes)
+        except Exception as e:
+            print(f"warning: feed parse failed [{source}]: {e}", file=sys.stderr)
+            failures += 1
+            continue
+        for it in items:
+            if not it["title"] or not it["url"]:
+                continue
+            if it["url"] in seen:
+                continue
+            if not pub_within(it["published"], max_age):
+                continue
+            tier = is_match(it["title"])
+            if not tier:
+                continue
+            matches.append({
+                "source": source,
+                "tier": tier,
+                "title": it["title"],
+                "company": guess_company(it["title"]),
+                "url": it["url"],
+                "published": it["published"],
+            })
+
+    if failures == len(FEEDS):
+        print("error: all feeds failed", file=sys.stderr)
+        sys.exit(1)
+
+    if seen_path:
+        seen.update(m["url"] for m in matches)
+        try:
+            with open(seen_path, "w") as f:
+                json.dump(sorted(seen), f, indent=1)
+        except Exception as e:  # noqa: BLE001
+            print(f"warning: could not write seen file: {e}", file=sys.stderr)
+
+    print(json.dumps(matches, indent=1))
+
+
+if __name__ == "__main__":
+    main()
