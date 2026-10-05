@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Drive Browser Use Cloud API v4 (hosted agents) as the user.
+
+Usage:
+  browser-use list
+  browser-use run --task "..." [--model ultrafast] [--max-cost 1.00]
+                  [--output-schema '{"type":"object",...}'] [--no-wait]
+  browser-use status <run_id>
+  browser-use result <run_id>
+
+Auth uses the stored custom.browser-use connector via dynamic credential
+surrogates; no raw key is ever handled here.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import (  # noqa: E402
+    add_surrogate_to_request,
+    read_json_response,
+)
+
+API_HOST = "api.browser-use.com"
+BASE = f"https://{API_HOST}/api/v4"
+CREDENTIAL_NAME = "custom.browser-use"
+ALLOWED_HOSTS = [API_HOST]
+TIMEOUT = 60
+
+
+def req(method: str, path: str, body: dict | None = None) -> dict:
+    data = json.dumps(body).encode("utf-8") if body is not None else None
+    r = urllib.request.Request(
+        BASE + path, data=data, method=method,
+        headers={"Content-Type": "application/json",
+                 "User-Agent": "muse-assistant-browseruse-skill"})
+    add_surrogate_to_request(r, CREDENTIAL_NAME, allowed_hosts=ALLOWED_HOSTS)
+    try:
+        with urllib.request.urlopen(r, timeout=TIMEOUT) as resp:
+            return read_json_response(resp)
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:2000]
+        raise RuntimeError(f"HTTP {exc.code} {exc.reason}: {detail}")
+
+
+def cmd_list() -> int:
+    out = req("GET", "/runs")
+    runs = out.get("runs", out if isinstance(out, list) else [])
+    for r in runs:
+        print(json.dumps({"id": r.get("id"), "status": r.get("status"),
+                          "task": (r.get("task") or "")[:80]}))
+    return 0
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    body: dict = {"task": args.task, "model": args.model,
+                  "browserSettings": {"proxyCountryCode": "us"}}
+    if args.max_cost:
+        body["maxCostUsd"] = args.max_cost
+    if args.output_schema:
+        body["outputSchema"] = json.loads(args.output_schema)
+    out = req("POST", "/runs", body)
+    run_id = out["id"]
+    print(f"browser-use: run {run_id} status={out.get('status')}", file=sys.stderr)
+    if not args.no_wait:
+        return cmd_wait(run_id, args.timeout)
+    print(run_id)
+    return 0
+
+
+def cmd_wait(run_id: str, timeout: int = 1800) -> int:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        st = req("GET", f"/runs/{run_id}/status").get("status")
+        if st in ("completed", "failed", "cancelled"):
+            print(f"browser-use: run {run_id} -> {st}", file=sys.stderr)
+            return cmd_result(run_id)
+        time.sleep(15)
+    print(f"browser-use: run {run_id} still not terminal after {timeout}s",
+          file=sys.stderr)
+    return 2
+
+
+def cmd_result(run_id: str) -> int:
+    out = req("GET", f"/runs/{run_id}")
+    print(json.dumps(out, indent=2, ensure_ascii=False))
+    return 0
+
+
+def main(argv: list[str]) -> int:
+    p = argparse.ArgumentParser(description="Browser Use Cloud API v4")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("list", help="list recent runs")
+
+    r = sub.add_parser("run", help="create an agent run and wait for it")
+    r.add_argument("--task", required=True, help="natural-language goal")
+    r.add_argument("--model", default="bu-ultrafast",
+                   help="v4 model (default: bu-ultrafast)")
+    r.add_argument("--max-cost", type=float, default=None,
+                   help="kill the run if cost exceeds this USD")
+    r.add_argument("--output-schema", default=None,
+                   help="JSON schema the final output must follow")
+    r.add_argument("--no-wait", action="store_true",
+                   help="return after creating the run")
+    r.add_argument("--timeout", type=int, default=1800,
+                   help="seconds to wait for completion")
+
+    s = sub.add_parser("status", help="poll one run's status")
+    s.add_argument("run_id")
+    t = sub.add_parser("result", help="fetch one run's full result")
+    t.add_argument("run_id")
+    w = sub.add_parser("wait", help="wait for a run then print result")
+    w.add_argument("run_id")
+    w.add_argument("--timeout", type=int, default=1800)
+
+    args = p.parse_args(argv)
+    try:
+        if args.cmd == "list":
+            return cmd_list()
+        if args.cmd == "run":
+            return cmd_run(args)
+        if args.cmd == "status":
+            print(req("GET", f"/runs/{args.run_id}/status").get("status"))
+            return 0
+        if args.cmd == "result":
+            return cmd_result(args.run_id)
+        if args.cmd == "wait":
+            return cmd_wait(args.run_id, args.timeout)
+    except RuntimeError as exc:
+        print(f"browser-use: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
