@@ -1,0 +1,37 @@
+If you manage websites for clients, there's something worth knowing about right now: As of March 15, SSL/TLS certificates—the security credentials showing that your clients' sites are secure—now have to be renewed far more often than they used to. The renewal window has shrunk to 200 days. In March 2029, that window will shrink to just 47 days.
+
+This is a dramatic shift from the previous 398-day maximum. For agencies managing dozens or hundreds of client sites, it changes a few things, including your workflows, your maintenance pricing and, in some cases, your conversations with clients. Most agencies will be fine, especially if you are already using automatically renewing certificates. But now is the time to check, not in 2029.
+
+What's Changing, And Why?
+
+In April 2025, the CA/Browser Forum (the industry body that governs how SSL/TLS certificates work across the internet) passed ballot SC081v3. Twenty-five members voted in favor. No one voted against it.
+
+The change was originally proposed by Apple and quickly endorsed by Google, Mozilla and Microsoft. When major browser vendors line up behind something, it does not stay theoretical for long.
+
+The changes roll out in staged phases: On March 15, the maximum lifespan of SSL/TLS certificates dropped to 200 days. On March 15, 2027, the maximum lifespan will drop to 100 days. On March 15, 2029, the maximum lifespan will drop to 47 days, with domain validation reuse limited to just 10 days.
+
+The reasoning behind the change seems to be security-driven, as shorter certificate lifespans mean that if a certificate is ever compromised, the window during which an attacker can use it shrinks dramatically. It also pushes the industry toward automation, which in the long run can reduce human error.
+
+The new certificate limits apply specifically to publicly trusted SSL/TLS certificates, meaning the ones used on websites accessible across the internet. It doesn't affect private PKI certificates used on internal networks, or certificates used for email signing, code signing or document signing. Those operate under separate rules.
+
+What This Means For Agencies
+
+Your renewal workflows need updating. If your team currently handles SSL renewals manually on an annual basis, that process is going to need to change. By 2027, you will be looking at renewals every three months per site. By 2029, it'll be about every six weeks. Multiply that across your client portfolio, and it adds up fast.
+
+The industry is pushing hard toward automation here. Protocols like Automated Certificate Management Environment (ACME), used by Let's Encrypt and most major certificate authorities, can handle this automatically.
+
+You should check your maintenance packages. If SSL certificate management is bundled into your maintenance retainers, take a look at what you're currently charging and what that scope of work will look like under the new timeline. More frequent renewals means more monitoring time, more verification touchpoints and more exposure if something goes wrong on your watch.
+
+Review what certificates your clients are using. Standard domain validated (DV) certificates from providers are already set up for automation. But if some of your clients are using organization validated (OV) or extended validation (EV) certificates, which include company identity information, those have additional verification steps that are more complex to automate.
+
+What This Means If You're A Site Owner
+
+A lapsed SSL certificate isn't just a technical inconvenience. When a certificate expires, browsers serve a full-page security warning to anyone who tries to visit your site. That is a reputational hit, and depending on your industry, it could also be a compliance issue.
+
+Practical Steps To Take Right Now
+
+Don't panic. The first change only just happened. If you are already using auto-renewing certificates from your hosting provider or a service like Let's Encrypt, you are likely in good shape. Audit your certificate inventory. Confirm your automation. If renewals are still happening manually, now is the time to switch. Update your maintenance schedule. Build in enough buffer time to ensure that certificates are always renewed, installed and verified at least one week before expiration. Talk to your clients. Site owners deserve to know this is coming.
+
+The Bottom Line
+
+For agencies, this is actually an opportunity. Clients who don't yet have a clear maintenance agreement with SSL management built in are going to need one. The changes are happening regardless. Agencies that prepare now, automate early and communicate clearly with their clients will be better positioned than those who wait.
