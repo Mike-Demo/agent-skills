@@ -28,7 +28,7 @@ public REST endpoint for them). Example:
 `bin/jobspipe-mcp list_signals '{}'`.
 
 ## Signals (live, created 2026-09-30)
-Three signals, all `mode: "jobs"`, email destination `hey.demo@mikedemo.email`,
+Three signals, all `mode: "jobs"`, email destination `your-email@example.com`,
 cadence `instant`, evaluated continuously at ZERO credit cost:
 - Partnerships Leadership (`59b52841-4a19-4e9e-9703-41800122d558`) — Head/Director/VP of Partnerships titles
 - Alliances Channel Ecosystem (`286d415c-781f-408e-8f73-d6adbadb93e0`) — Alliances/Channel/Ecosystem/BD leadership titles
