@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Scan text with the GPTZero AI-detection API (v2).
+
+Usage examples:
+  gptzero-scan --text "Your draft here..."
+  gptzero-scan --file draft.txt
+  echo "Your draft here..." | gptzero-scan
+  gptzero-scan --file draft.txt --json   # raw API response
+
+Prints a human-readable summary: word count, P(ai), P(human), predicted
+class, plus a reliability note. Auth uses the stored custom.gptzero
+connector via dynamic credential surrogates; no raw key is ever handled.
+
+Known limits (from GPTZero's own docs and independent testing):
+  - Needs ~250 characters minimum; unstable under ~100 words. Follow-up
+    drafts are short, so treat scores as a rough signal, not a verdict.
+  - False positives happen on human prose (ESL bias documented in
+    Liang et al., Patterns 2023; dense technical prose inflates scores).
+  - Calibrate first: scan Demo's known-human writing and compare drafts
+    against that baseline rather than against 0.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import (  # noqa: E402
+    add_surrogate_to_request,
+    read_json_response,
+)
+
+API_HOST = "api.gptzero.me"
+PREDICT_URL = f"https://{API_HOST}/v2/predict/text"
+CREDENTIAL_NAME = "custom.gptzero"
+ALLOWED_HOSTS = [API_HOST]
+TIMEOUT = 90
+MIN_CHARS = 250
+# Cloudflare (error 1010) blocks urllib's default User-Agent on api.gptzero.me.
+# A browser UA passes and the request is otherwise identical.
+BROWSER_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+              "AppleWebKit/537.36 (KHTML, like Gecko) "
+              "Chrome/126.0.0.0 Safari/537.36")
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Scan text with the GPTZero API")
+    src = p.add_mutually_exclusive_group()
+    src.add_argument("--text", default="", help="Text to scan")
+    src.add_argument("--file", default="", help="File containing text to scan")
+    p.add_argument("--json", action="store_true",
+                   help="Print the raw API response JSON")
+    return p.parse_args(argv)
+
+
+def predict(text: str) -> dict:
+    body = json.dumps({"document": text}).encode("utf-8")
+    req = urllib.request.Request(
+        PREDICT_URL, data=body, method="POST",
+        headers={"Content-Type": "application/json",
+                 "Accept": "application/json",
+                 "User-Agent": BROWSER_UA},
+    )
+    add_surrogate_to_request(
+        req, CREDENTIAL_NAME, allowed_hosts=ALLOWED_HOSTS)
+    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        return read_json_response(resp)
+
+
+def summarize(text: str, result: dict) -> str:
+    words = len(text.split())
+    lines = [f"words: {words}"]
+    docs = result.get("documents") or []
+    if docs:
+        d = docs[0]
+        probs = d.get("class_probabilities") or {}
+        ai = probs.get("ai")
+        human = probs.get("human")
+        mixed = probs.get("mixed")
+        if ai is not None:
+            lines.append(f"P(ai): {ai:.2f}")
+        if human is not None:
+            lines.append(f"P(human): {human:.2f}")
+        if mixed is not None:
+            lines.append(f"P(mixed): {mixed:.2f}")
+        cg = d.get("completely_generated_prob")
+        if cg is not None:
+            lines.append(f"completely_generated_prob: {cg:.2f}")
+    else:
+        lines.append("no document scores returned")
+        lines.append(json.dumps(result)[:500])
+    if words < 100:
+        lines.append("note: under ~100 words — GPTZero is unstable at this "
+                     "length; treat the score as a rough signal only")
+    elif len(text) < MIN_CHARS:
+        lines.append("note: under ~250 characters — below GPTZero's "
+                     "recommended minimum; score may be unreliable")
+    return "\n".join(lines)
+
+
+def main(argv: list[str]) -> int:
+    args = parse_args(argv)
+    if args.file:
+        with open(args.file, encoding="utf-8") as f:
+            text = f.read()
+    elif args.text:
+        text = args.text
+    elif not sys.stdin.isatty():
+        text = sys.stdin.read()
+    else:
+        print("no input: use --text, --file, or pipe text on stdin",
+              file=sys.stderr)
+        return 2
+    text = text.strip()
+    if not text:
+        print("empty input", file=sys.stderr)
+        return 2
+    result = predict(text)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(summarize(text, result))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
