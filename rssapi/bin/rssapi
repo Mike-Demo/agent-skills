@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Call the rssapi.net API with the stored credential.
+
+The API key lives in the URL path: https://api.rssapi.net/v1/{apikey}/...
+
+Usage:
+  rssapi <path-after-key> [key=value ...] [--method GET|POST]
+
+Examples:
+  rssapi subscriptions
+  rssapi subscribe url=https://example.com/feed --method POST
+  rssapi parse url=https://example.com/feed
+  # NOTE: there is no `detect` endpoint (API returns 404 "Invalid API
+  # Endpoint"). Find feed URLs by scanning page HTML for
+  # <link rel="alternate" type="application/rss+xml"> yourself.
+
+Prints the JSON response. Never prints the raw key (surrogate only).
+"""
+import json
+import sys
+import urllib.parse
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import (
+    url_with_surrogate_path_segment,
+    read_json_response,
+)
+
+BASE = "https://api.rssapi.net/v1/{}"
+ALLOWED = {"api.rssapi.net"}
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    method = "GET"
+    params = {}
+    path = None
+    for a in args:
+        if a.startswith("--method="):
+            method = a.split("=", 1)[1].upper()
+        elif a.startswith("--method"):
+            method = "POST" if method == "GET" else method
+        elif "=" in a and path is not None:
+            k, v = a.split("=", 1)
+            params[k] = v
+        elif path is None:
+            path = a.strip("/")
+        else:
+            print(f"unexpected argument: {a}", file=sys.stderr)
+            return 2
+    if path is None:
+        print(__doc__, file=sys.stderr)
+        return 2
+
+    url = url_with_surrogate_path_segment(
+        f"{BASE}/{path}", "custom.rssapi", allowed_hosts=ALLOWED
+    )
+    # The helper percent-encodes the surrogate (hsurr%3A...), which stops the
+    # egress exchange from recognizing and swapping it for the real key.
+    # Restore the literal hsurr: form in the path segment only.
+    url = url.replace("hsurr%3A", "hsurr:", 1)
+    if params:
+        url += ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
+
+    req = urllib.request.Request(
+        url,
+        data=b"" if method == "POST" else None,
+        headers={
+            "Accept": "application/json",
+            # rssapi.net sits behind Cloudflare, which bans the default
+            # Python-urllib user-agent (error 1010). Send a browser UA.
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/126.0.0.0 Safari/537.36",
+        },
+        method=method,
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = read_json_response(resp)
+    except urllib.error.HTTPError as e:
+        try:
+            body = e.read().decode("utf-8", "replace")
+        except Exception:
+            body = ""
+        print(f"HTTP {e.code}: {body[:800]}", file=sys.stderr)
+        return 1
+    print(json.dumps(data, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
