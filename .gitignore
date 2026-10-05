@@ -2,3 +2,6 @@
 *.log
 node_modules/
 .env
+*-tokens.json
+.clera-tokens.json
+.indeed-tokens.json
