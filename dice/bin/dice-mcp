@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""dice-mcp — CLI wrapper for the public Dice MCP job-search server.
+
+Streamable HTTP MCP at https://mcp.dice.com/mcp (no auth, no login).
+Performs the MCP handshake (initialize -> notifications/initialized ->
+tools/call) and prints results as JSON.
+
+Subcommands:
+  search   Friendly wrapper around the search_jobs tool.
+  call     Raw tools/call passthrough: call <tool> '<json-args>'
+  details  get_job_details for a job guid.
+  company  get_company for a job guid.
+
+Examples:
+  bin/dice-mcp search --keyword "partnerships director" --workplace Remote --page-size 20
+  bin/dice-mcp search --keyword "python engineer" --location "Austin, TX" --posted-days 7 --sort datePosted
+  bin/dice-mcp details <guid>
+  bin/dice-mcp call search_jobs '{"keyword":"devops","workplace_types":["Remote"],"jobs_per_page":10}'
+"""
+
+import json
+import re
+import sys
+
+try:
+    import requests
+except ImportError:
+    sys.stderr.write("dice-mcp requires the 'requests' package (python3 -m pip install requests)\n")
+    sys.exit(2)
+
+ENDPOINT = "https://mcp.dice.com/mcp"
+PROTOCOL_VERSION = "2024-11-05"
+TIMEOUT = 30
+
+_session_id = None  # captured from 'mcp-session-id' response header if the server sends one
+
+
+def _headers():
+    h = {
+        "Content-Type": "application/json",
+        "Accept": "application/json,text/event-stream",
+        "MCP-Protocol-Version": PROTOCOL_VERSION,
+    }
+    if _session_id:
+        h["mcp-session-id"] = _session_id
+    return h
+
+
+def _sse_result(body):
+    """Extract the first complete JSON-RPC message from an SSE body."""
+    body = body.replace("\r\n", "\n")
+    for m in re.finditer(r"^data: (\{.*\})$", body, re.M):
+        try:
+            return json.loads(m.group(1))
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
+def _post(payload):
+    """POST one JSON-RPC message; tolerate the server's abruptly-closed stream."""
+    global _session_id
+    r = requests.post(ENDPOINT, json=payload, headers=_headers(),
+                      timeout=TIMEOUT, stream=True)
+    sid = r.headers.get("mcp-session-id")
+    if sid:
+        _session_id = sid
+    chunks = []
+    try:
+        for chunk in r.iter_content(chunk_size=65536):
+            if chunk:
+                chunks.append(chunk)
+    except Exception:
+        # Server sometimes closes the chunked stream without a terminator;
+        # the bytes collected so far are usually complete.
+        pass
+    body = b"".join(chunks).decode("utf-8", errors="replace")
+    env = _sse_result(body)
+    if env is None:
+        raise RuntimeError("no JSON-RPC message in SSE response (len=%d)" % len(body))
+    if env.get("error"):
+        raise RuntimeError("MCP error: %s" % json.dumps(env["error"]))
+    return env.get("result", {})
+
+
+def handshake():
+    res = _post({
+        "jsonrpc": "2.0", "id": 1, "method": "initialize",
+        "params": {
+            "protocolVersion": PROTOCOL_VERSION,
+            "capabilities": {},
+            "clientInfo": {"name": "dice-skill-cli", "version": "1.0.0"},
+        },
+    })
+    # initialized notification (no response expected)
+    try:
+        _post({"jsonrpc": "2.0", "method": "notifications/initialized"})
+    except Exception:
+        pass
+    return res.get("serverInfo", {})
+
+
+def tools_call(name, arguments):
+    res = _post({
+        "jsonrpc": "2.0", "id": 2, "method": "tools/call",
+        "params": {"name": name, "arguments": arguments},
+    })
+    if res.get("isError"):
+        text = ""
+        for block in res.get("content", []) or []:
+            if isinstance(block, dict) and block.get("type") == "text":
+                text += block.get("text", "")
+        raise RuntimeError("tool %s failed: %s" % (name, text or json.dumps(res)))
+    return res.get("structuredContent") or res
+
+
+COMPACT_FIELDS = [
+    "guid", "title", "companyName", "salary", "employmentType",
+    "workplaceTypes", "isRemote", "easyApply", "postedDate",
+    "detailsPageUrl", "companyPageUrl",
+]
+
+
+def compact_job(job):
+    loc = job.get("jobLocation") or {}
+    out = {k: job.get(k) for k in COMPACT_FIELDS}
+    out["location"] = loc.get("displayName")
+    out["summary"] = (job.get("summary") or "")[:300]
+    return out
+
+
+def cmd_search(args):
+    import argparse
+    p = argparse.ArgumentParser(prog="dice-mcp search")
+    p.add_argument("--keyword", required=True, help="job keyword or title (required)")
+    p.add_argument("--location", default=None, help='geographic location, e.g. "Austin, TX"')
+    p.add_argument("--workplace", action="append", default=None,
+                   help="Remote | On-Site | Hybrid (repeatable)")
+    p.add_argument("--posted-days", type=int, choices=[1, 3, 7], default=None,
+                   help="only jobs posted in the last 1, 3, or 7 days")
+    p.add_argument("--page-size", type=int, default=20, help="jobs per page, 1-100")
+    p.add_argument("--page", type=int, default=1)
+    p.add_argument("--sort", default="relevance", choices=["relevance", "datePosted"])
+    p.add_argument("--company", default=None, help="filter by company name")
+    p.add_argument("--employment-type", action="append", default=None,
+                   help="FULLTIME | CONTRACTS | PARTTIME | THIRD_PARTY | INTERNSHIP (repeatable)")
+    p.add_argument("--raw", action="store_true", help="print the full MCP result envelope")
+    ns = p.parse_args(args)
+
+    arguments = {
+        "keyword": ns.keyword,
+        "jobs_per_page": ns.page_size,
+        "page_number": ns.page,
+        "sort": ns.sort,
+    }
+    if ns.location:
+        arguments["location"] = ns.location
+    if ns.workplace:
+        arguments["workplace_types"] = ns.workplace
+    if ns.posted_days:
+        arguments["posted_date"] = {1: "ONE", 3: "THREE", 7: "SEVEN"}[ns.posted_days]
+    if ns.company:
+        arguments["company_name"] = ns.company
+    if ns.employment_type:
+        arguments["employment_types"] = ns.employment_type
+
+    handshake()
+    result = tools_call("search_jobs", arguments)
+    if ns.raw:
+        print(json.dumps(result, indent=2))
+        return
+    jobs = [compact_job(j) for j in (result.get("data") or [])]
+    meta = result.get("metadata") or {}
+    print(json.dumps({
+        "total": meta.get("total"),
+        "page": meta.get("page"),
+        "page_size": meta.get("pageSize"),
+        "total_pages": meta.get("totalPages"),
+        "jobs": jobs,
+    }, indent=2))
+
+
+def cmd_call(args):
+    if len(args) != 2:
+        sys.stderr.write("usage: dice-mcp call <tool> '<json-args>'\n")
+        sys.exit(2)
+    handshake()
+    print(json.dumps(tools_call(args[0], json.loads(args[1])), indent=2))
+
+
+def cmd_details(args):
+    if len(args) != 1:
+        sys.stderr.write("usage: dice-mcp details <job-guid>\n")
+        sys.exit(2)
+    handshake()
+    print(json.dumps(tools_call("get_job_details", {"job_id": args[0]}), indent=2))
+
+
+def cmd_company(args):
+    if len(args) != 1:
+        sys.stderr.write("usage: dice-mcp company <job-guid>\n")
+        sys.exit(2)
+    handshake()
+    print(json.dumps(tools_call("get_company", {"job_id": args[0]}), indent=2))
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help", "help"):
+        sys.stdout.write(__doc__)
+        return
+    cmd, rest = sys.argv[1], sys.argv[2:]
+    try:
+        if cmd == "search":
+            cmd_search(rest)
+        elif cmd == "call":
+            cmd_call(rest)
+        elif cmd == "details":
+            cmd_details(rest)
+        elif cmd == "company":
+            cmd_company(rest)
+        else:
+            sys.stderr.write("unknown subcommand: %s\n" % cmd)
+            sys.exit(2)
+    except RuntimeError as e:
+        sys.stderr.write("error: %s\n" % e)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
