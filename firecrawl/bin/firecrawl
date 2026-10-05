@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Call the Firecrawl v2 API (search + scrape) as the user.
+
+Usage:
+  firecrawl search "kosher restaurant San Francisco" --limit 5
+  firecrawl search "query" --scrape   # include markdown content per result
+  firecrawl scrape https://example.com/menu
+
+Auth uses the stored custom.firecrawl connector via dynamic credential
+surrogates; no raw key is ever handled here.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import urllib.request
+
+sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
+from dynamic_credentials import (  # noqa: E402
+    add_surrogate_to_request,
+    read_json_response,
+)
+
+API_HOST = "api.firecrawl.dev"
+BASE = f"https://{API_HOST}/v2"
+CREDENTIAL_NAME = "custom.firecrawl"
+ALLOWED_HOSTS = [API_HOST]
+TIMEOUT = 120
+
+
+def post(path: str, body: dict) -> dict:
+    data = json.dumps(body).encode("utf-8")
+    req = urllib.request.Request(
+        BASE + path, data=data, method="POST",
+        headers={"Content-Type": "application/json",
+                 "User-Agent": "muse-assistant-firecrawl-skill"})
+    add_surrogate_to_request(req, CREDENTIAL_NAME, allowed_hosts=ALLOWED_HOSTS)
+    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        return read_json_response(resp)
+
+
+def cmd_search(args: argparse.Namespace) -> int:
+    body = {"query": args.query, "limit": args.limit}
+    if args.scrape:
+        body["scrapeOptions"] = {"formats": ["markdown"], "onlyMainContent": True}
+    try:
+        out = post("/search", body)
+    except urllib.error.HTTPError as exc:
+        print(f"firecrawl: HTTP {exc.code} {exc.reason}\n"
+              f"{exc.read().decode('utf-8', errors='replace')[:1500]}",
+              file=sys.stderr)
+        return 1
+    data = out.get("data", out)
+    if isinstance(data, dict):
+        results = data.get("web") or data.get("results") or []
+    else:
+        results = data if isinstance(data, list) else []
+    for r in results:
+        print(json.dumps({
+            "title": r.get("title"),
+            "url": r.get("url"),
+            "snippet": (r.get("description") or r.get("snippet") or "")[:400],
+            "markdown": (r.get("markdown") or "")[:3000] if args.scrape else None,
+        }, ensure_ascii=False))
+    print(f"firecrawl: {len(results)} results", file=sys.stderr)
+    return 0
+
+
+def cmd_scrape(args: argparse.Namespace) -> int:
+    try:
+        out = post("/scrape", {
+            "url": args.url,
+            "formats": ["markdown"],
+            "onlyMainContent": True,
+        })
+    except urllib.error.HTTPError as exc:
+        print(f"firecrawl: HTTP {exc.code} {exc.reason}\n"
+              f"{exc.read().decode('utf-8', errors='replace')[:1500]}",
+              file=sys.stderr)
+        return 1
+    data = out.get("data", out)
+    print(data.get("markdown", "")[:12000])
+    return 0
+
+
+def main(argv: list[str]) -> int:
+    p = argparse.ArgumentParser(description="Firecrawl v2 search and scrape")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    s = sub.add_parser("search", help="web search, optionally with scraped content")
+    s.add_argument("query")
+    s.add_argument("--limit", type=int, default=5)
+    s.add_argument("--scrape", action="store_true",
+                   help="include page markdown for each result")
+
+    c = sub.add_parser("scrape", help="scrape one URL to markdown")
+    c.add_argument("url")
+
+    args = p.parse_args(argv)
+    if args.cmd == "search":
+        return cmd_search(args)
+    return cmd_scrape(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
