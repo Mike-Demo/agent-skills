@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# jobsdb-search: free manual job search against the public DevelopIQ-ai/jobs_db
+# Supabase (hiring.cafe scrape, ~178k US jobs). No credits, no auth beyond the
+# published anon key. Free fallback for one-off searches to spare JobsPipe credits.
+#
+# Gotchas (verified 2026-10-01):
+# - Data mixes fresh and STALE listings (found May 2026 rows). Always use --since
+#   to bound freshness; there is no active/closed flag or ghost score.
+# - Aggregate queries (count, order by) time out on their Supabase. Keep to
+#   simple ilike filters + limit.
+# - Repo is brand new (created 2026-10-01, 0 stars). Don't build automation on it.
+#
+# Usage:
+#   jobsdb-search --title "partnerships" --since 2026-09-01 --limit 20
+#   jobsdb-search --title "director" --company "stripe" --limit 10
+#   jobsdb-search --title "alliances" --remote --since 2026-09-15
+set -euo pipefail
+
+API_URL="https://snimonofzyrbsqovpnsq.supabase.co/rest/v1/ds_hiring_cafe"
+ANON_KEY="sb_publishable_TPu8VN6vPj2yKYAG-Z-_fg_LubsqKkn"
+
+TITLE="" COMPANY="" SINCE="" LIMIT=20 REMOTE=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --title)   TITLE="$2"; shift 2 ;;
+    --company) COMPANY="$2"; shift 2 ;;
+    --since)   SINCE="$2"; shift 2 ;;   # e.g. 2026-09-01 (scraped_at >= date)
+    --limit)   LIMIT="$2"; shift 2 ;;
+    --remote)  REMOTE=1; shift ;;
+    -h|--help)
+      sed -n '2,20p' "$0"; exit 0 ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+# URL-encode a string via python3
+urlenc() { python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$1"; }
+
+params="select=$(urlenc 'title,company_name,locations,workplace_type,scraped_at,apply_url,salary_min_yearly,salary_max_yearly,seniority_level')"
+params="$params&limit=$LIMIT"
+[[ -n "$TITLE"   ]] && params="$params&title=$(urlenc "ilike.*${TITLE}*")"
+[[ -n "$COMPANY" ]] && params="$params&company_name=$(urlenc "ilike.*${COMPANY}*")"
+[[ -n "$SINCE"   ]] && params="$params&scraped_at=$(urlenc "gte.${SINCE}")"
+[[ "$REMOTE" -eq 1 ]] && params="$params&workplace_type=$(urlenc "ilike.*remote*")"
+
+curl -s --max-time 45 "${API_URL}?${params}" -H "apikey: ${ANON_KEY}" | python3 -c "
+import json, sys
+try:
+    rows = json.load(sys.stdin)
+except Exception as e:
+    print('API error / bad response', file=sys.stderr); sys.exit(1)
+if isinstance(rows, dict):
+    print('API error:', rows.get('message', rows), file=sys.stderr); sys.exit(1)
+print(f'{len(rows)} result(s)', file=sys.stderr)
+for r in rows:
+    sal = ''
+    if r.get('salary_min_yearly') or r.get('salary_max_yearly'):
+        sal = f\"  \${r.get('salary_min_yearly') or '?'}- \${r.get('salary_max_yearly') or '?'}/yr\"
+    loc = r.get('locations') or r.get('workplace_type') or '?'
+    print(f\"- {r.get('title')} @ {r.get('company_name')} [{loc}]{sal}\")
+    print(f\"  scraped {str(r.get('scraped_at'))[:10]} | {r.get('apply_url')}\")
+"
