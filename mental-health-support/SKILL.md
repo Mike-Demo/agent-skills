@@ -32,8 +32,15 @@ never replaces a qualified mental-health professional.
    5. Starter example mappings are never activated automatically. The agent
       proposes each mapping ("I can reframe 'Rejected' as 'Not selected for
       this role' — want me to use that?") and it takes effect only after the
-      user accepts it — individually or with "accept all". Accepted mappings
-      are stored as preferences.
+      user accepts it. Approval is per-item or persistent — the user says
+      **"Use this once"** (this item only), **"Save this mapping"** (all
+      future matches), or **"Accept all proposed mappings"**. The skill
+      tracks two separate states: `accepted_term` (detection allowed) and
+      `accepted_mapping` (transformation allowed). A term can be detectable
+      with no approved transformation: at `suggest`, the agent flags the
+      term and may draft one alternative explicitly marked **"Proposed —
+      not approved"**, asking which approval the user wants. It never
+      silently reuses an unapproved draft as if it were a mapping.
    "Turn it off" pauses behavior immediately but preserves settings; "turn it
    off and delete my settings" erases everything, including scheduled
    digests and quiet hours (see Configuration).
@@ -67,13 +74,16 @@ The user picks one. Default is `suggest`.
 - `off` — skill inactive; wording passes through untouched.
 - `highlight` — mark harsh terms in place (bold or quotes) without changing
   them. Warning: highlighting *increases* visual salience and can make the
-  wording hit harder. Use only with explicit user consent; otherwise prefer a
-  low-salience marker or a single summary notice.
+  wording hit harder. Use only with explicit user consent — selecting
+  `highlight` as the intervention level counts as that consent; otherwise
+  prefer a low-salience marker or a single summary notice.
 - `suggest` — show the original with a calmer alternative offered alongside. *(default)*
 - `replace` — show the calmer wording in the displayed view, labeled as
   transformed; original one request away. Replace only recognized labels and
-  short phrases — never full messages. For full emails or notices, use
-  `suggest` or a side-by-side display with the untouched original.
+  short phrases — a "short phrase" is a label or fragment of roughly ten
+  words or fewer that is not a complete standalone message. Anything that
+  stands alone as a message (a full email, a complete decision sentence)
+  uses `suggest` or a side-by-side display with the untouched original.
 - `summarize` — collapse updates into factual digests ("Three applications
   changed status") without emotionally loaded wording.
 
@@ -180,6 +190,15 @@ Offer, never impose:
 identifier when available (one application producing both an email and a
 tracker event is one change, not two). When completeness is unknown, say so:
 "I found three status changes in the updates available to me."
+
+**Named cadences resolve to user-selected times.** Defaults: twice daily →
+09:00 and 16:00; daily → 09:00; hourly → top of the hour. The agent never
+invents times — if the user hasn't chosen, it states the default and asks.
+
+**Large batches need permission to collapse.** If a digest would show more
+items than fit comfortably, the agent asks before summarizing: "There are 47
+updates — show all with alternatives, or a counts-only summary with details
+on request?" It never silently collapses a batch at `suggest`.
 
 ## If the user expresses immediate danger
 

@@ -201,6 +201,40 @@
         "Keeps the original available and marked"
       ],
       "files": []
+    },
+    {
+      "id": 19,
+      "prompt": "Intervention is suggest, digest cadence twice daily. Three updates since morning: 'Rejected — Acme', 'Withdrawn — Globex', 'Interview invitation — Initech'. Give me the digest.",
+      "expected_output": "All three originals shown with per-item handling (alternative offered for the mapped term, no-mapping notice for Withdrawn, unchanged for the invite) — never collapsed to counts-only at suggest level.",
+      "expectations": [
+        "Shows each original item, not just counts",
+        "Offers the agent-generated alternative for the mapped term",
+        "States no approved alternative exists for unmapped terms instead of inventing one",
+        "Labels generated wording as agent-generated, not in quotes as employer words"
+      ],
+      "files": []
+    },
+    {
+      "id": 20,
+      "prompt": "Reframe for display: the employer wrote 'We regret to inform you that we will not be moving forward.'",
+      "expected_output": "The alternative is labeled as agent-generated wording; quotation marks are reserved for the employer's exact original.",
+      "expectations": [
+        "Generated alternative is NOT wrapped in quotation marks",
+        "Uses an explicit 'agent-generated' label",
+        "The employer's original is quoted exactly and kept available"
+      ],
+      "files": []
+    },
+    {
+      "id": 21,
+      "prompt": "For 'Rejected', use 'Not selected for this role' just this once.",
+      "expected_output": "The mapping applies to the current item only and is not saved as a persistent mapping.",
+      "expectations": [
+        "Applies the alternative to this item",
+        "Does not save it as an ongoing mapping",
+        "Offers 'save this mapping' as a follow-up choice"
+      ],
+      "files": []
     }
   ],
   "skill_name": "mental-health-support",

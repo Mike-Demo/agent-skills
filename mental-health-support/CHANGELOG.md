@@ -3,6 +3,36 @@
 > Note: this repository has no changelog convention yet. This file proposes the
 > entry format for the new skill; adopt, adapt, or drop per maintainer preference.
 
+## 2026-10-05 — Round 2: fix example-vs-rule contradictions (revalidation 4/6 → fixes)
+
+Second external review passed activation, specificity, crisis, and locality,
+but failed mode boundaries and provenance — the *examples* contradicted the
+rules. Fixed:
+
+- Digest example 4 relabeled as what it is (`summarize`); added example 4b,
+  a true suggest-level digest that shows originals with alternatives offered
+  and never silently collapses.
+- All agent-generated alternatives in examples unquoted; fixed label
+  "Agent-generated alternative:" used throughout; quotation marks reserved
+  for exact source text.
+- Mapping approval is now per-item or persistent ("Use this once" /
+  "Save this mapping" / "Accept all proposed mappings"); separate
+  `accepted_term` vs `accepted_mapping` states; detectable-but-unmapped
+  terms get a flagged original plus an explicitly "Proposed — not approved"
+  draft, never a silent reuse.
+- Named cadences resolve to user-selected times (defaults: twice daily →
+  09:00/16:00, daily → 09:00, hourly → top of hour); agent never invents times.
+- Large-batch rule: ask before collapsing ("47 updates — show all or
+  counts-only summary?").
+- Replace boundary defined: "short phrase" ≈ ≤10 words, not a complete
+  standalone message. Selecting `highlight` counts as its required consent.
+- Already-neutral statuses (Withdrawn, Role canceled, Hiring paused) shown
+  unchanged — no alternative proposed, keeping output deterministic.
+- Danger example tightened to the minimal protocol; third-party-report
+  example adds emergency-services escalation.
+- Tests: evals 19–21 (suggest digest fidelity, provenance labeling,
+  one-time mapping approval). 21 evals total.
+
 ## 2026-10-05 — Spec hardening after external review (Copilot, Think deeper)
 
 Reviewed by an independent model against the spec; fixed every critical finding:

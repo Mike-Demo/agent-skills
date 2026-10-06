@@ -29,6 +29,10 @@ Rules:
   Each maps one-to-one to its own neutral label. "Application closed" is
   reserved for states the tracker's data model actually marks closed — it is
   not a synonym for "rejected."
+- **Already-neutral statuses stay unchanged.** "Withdrawn," "Role canceled,"
+  and "Hiring paused" carry no loaded wording, so the skill proposes no
+  alternative for them — it shows them as-is. This keeps output deterministic:
+  no detected sensitive term, no transformation.
 - **Reframe whole decisions, not lead-ins.** For a full decision sentence,
   reframe the sentence ("The employer is not moving forward with this
   application"), never just the polite opening ("We regret to inform you" →

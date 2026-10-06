@@ -10,8 +10,11 @@
 
 > Status: Rejected — Acme Corp, Senior PM
 >
-> *Suggestion (softer wording available):* "Status: Not selected for this role — Acme Corp, Senior PM"
-> *Original preserved above; nothing was changed in your tracker.*
+> Agent-generated alternative:
+> Status: Not selected for this role — Acme Corp, Senior PM
+>
+> *Shown with softer wording — original available. Source changed: false.
+> Nothing was changed in your tracker.*
 
 ## 2. Replace mode: labeled transformation
 
@@ -19,8 +22,12 @@
 
 **Output:**
 
-> ~~Rejection email~~ *Not-selected notice* — from Acme Corp
-> *(Shown with softer wording — original: "Rejection email". Say "show original" anytime.)*
+> Original: "Rejection email" — from Acme Corp
+>
+> Agent-generated alternative:
+> Not-selected notice
+>
+> *Shown with softer wording — say "show original" anytime. Source changed: false.*
 
 ## 3. Plain mode: user dislikes euphemisms
 
@@ -30,11 +37,11 @@
 
 > Status: Failed — Globex Inc.
 >
-> *Plain mode is on, so I'm keeping the literal wording. A factual equivalent would be "Not selected for this role" — say the word if you want it.*
+> *Plain mode is on, so I'm keeping the literal wording. A factual equivalent would be: Not selected for this role — say the word if you want it.*
 
-## 4. Digest summary (twice-daily cadence)
+## 4. Summarize-level digest (twice-daily cadence)
 
-**Input:** five tracker changes since the morning check-in.
+**Input:** intervention is `summarize`; five tracker changes since the morning check-in.
 
 **Output:**
 
@@ -42,6 +49,23 @@
 > Three applications changed status. Two employers sent updates. Four applications remain active.
 >
 > *Details on request; original wording available for each item.*
+
+## 4b. Suggest-level digest (twice-daily cadence) — originals are NOT collapsed
+
+**Input:** intervention is `suggest`; three tracker changes since the morning check-in.
+
+**Output:**
+
+> **Application updates — 4:00 PM digest** (3 items)
+>
+> 1. Original: "Status: Rejected — Acme Corp, Senior PM"
+>    Agent-generated alternative: Status: Not selected for this role — Acme Corp, Senior PM
+> 2. Original: "Status: Withdrawn — Globex Inc, Director"
+>    *No approved alternative is configured for "Withdrawn" — say "propose one" if you want a suggestion.*
+> 3. Original: "Interview invitation — Initech, Staff Engineer"
+>    *No sensitive terms detected; shown unchanged.*
+>
+> *Shown with softer wording where applied — originals available. Source changed: false. Details on request.*
 
 ## 5. Ambiguous update — no invented conclusion
 
@@ -78,11 +102,11 @@
 
 **Output:**
 
-> I'm really glad you told me. I'm not a counselor and I can't assess what you're going through, but I want you to have this:
+> I'm pausing the job-search work.
 >
-> **US: call or text 988** (Suicide and Crisis Lifeline) · **UK/Ireland: Samaritans 116 123** · elsewhere: local emergency services.
+> If you're in the US, call or text **988** (Suicide and Crisis Lifeline). If you're in the UK or Ireland, call **Samaritans 116 123**. Elsewhere, contact your local emergency services.
 >
-> *I'm pausing the job-search work. Come back to it whenever — or never. It'll keep.*
+> *I'll wait here. Come back to the task whenever you're ready.*
 
 ## 9. Activation — the skill asks before detecting anything
 
@@ -107,7 +131,8 @@
 > not as you being in danger — the job-search work continues. If you want
 > to help them: encourage them to call or text **988** (US) or **Samaritans
 > 116 123** (UK/Ireland) right now, stay with them if you can, and don't
-> try to assess their risk yourself.
+> try to assess their risk yourself. If you believe they're in immediate
+> danger right now, contact your local emergency services.
 >
 > *Want to keep going with the tracker updates?*
 
