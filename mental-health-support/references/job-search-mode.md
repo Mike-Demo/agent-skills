@@ -13,16 +13,26 @@ their own, and `plain_mode` users may prefer the literal originals.
 
 | Original (example) | Neutral alternative (example) |
 |---|---|
-| Rejected | Application closed |
-| Rejection email | Application update |
+| Rejected | Not selected for this role |
+| Rejection email | Not-selected notice |
 | Failed | Not selected for this role |
-| We regret to inform you | Update on your application |
+| We regret to inform you that we will not be moving forward | The employer is not moving forward with this application |
 | Not a fit | Not moving forward |
 
 Rules:
 
 - **User customization wins.** Never assume "rejection" affects everyone the
-  same way. Ask which words bother *this* user before applying any mapping.
+  same way. Ask which words bother *this* user before applying any mapping
+  (see the activation sequence in `SKILL.md`).
+- **Never collapse distinct outcomes.** A tracker may mark applications
+  rejected, withdrawn, role canceled, hiring paused, or position filled.
+  Each maps one-to-one to its own neutral label. "Application closed" is
+  reserved for states the tracker's data model actually marks closed — it is
+  not a synonym for "rejected."
+- **Reframe whole decisions, not lead-ins.** For a full decision sentence,
+  reframe the sentence ("The employer is not moving forward with this
+  application"), never just the polite opening ("We regret to inform you" →
+  "Update on your application" deletes the decision itself).
 - **The mapping is display-only.** The tracker's underlying status value is
   untouched. If the user later exports or shares the tracker, the original
   values are what leave the system.
