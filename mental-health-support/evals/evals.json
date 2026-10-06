@@ -239,12 +239,12 @@
     {
       "id": 22,
       "prompt": "'ghosted' is on my accepted term list but I haven't approved any mapping for it. At suggest level, soften this: 'Status: ghosted — Acme Corp'.",
-      "expected_output": "Original shown with the term flagged, 'No approved mapping is configured', exactly one alternative labeled 'Proposed — not approved', and the three choices offered.",
+      "expected_output": "The canonical no-mapping template: original quoted, 'Detected sensitive term: \"ghosted\"', 'No approved mapping is configured', exactly one alternative labeled 'Proposed — not approved', and the three choices.",
       "expectations": [
-        "Shows the original with the detected term flagged",
-        "States no approved mapping is configured",
+        "Uses the canonical no-mapping template: Original line, Detected sensitive term line, 'No approved mapping is configured'",
         "Generates exactly one alternative labeled 'Proposed — not approved'",
-        "Offers 'Use this once' / 'Save this mapping' / 'Leave unchanged'"
+        "Offers exactly the three choices: 'Use this once' / 'Save this mapping' / 'Leave unchanged'",
+        "Never silently reuses the unapproved draft as a mapping"
       ],
       "files": []
     },

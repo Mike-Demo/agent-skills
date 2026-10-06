@@ -37,12 +37,23 @@ never replaces a qualified mental-health professional.
       future matches), or **"Accept all proposed mappings"**. The skill
       tracks two separate states: `accepted_term` (detection allowed) and
       `accepted_mapping` (transformation allowed). A term can be detectable
-      with no approved transformation — in that state the agent must do
-      exactly this, every time: show the original with the detected term
-      flagged; state "No approved mapping is configured"; generate exactly
-      one alternative labeled **"Proposed — not approved"**; then offer
-      three choices — **"Use this once"**, **"Save this mapping"**, or
-      **"Leave unchanged"**. It never silently reuses an unapproved draft
+      with no approved transformation — in that state the agent must produce
+      exactly this output, every time:
+
+      ```text
+      Original: "<exact source text>"
+      Detected sensitive term: "<term>"
+      No approved mapping is configured.
+
+      Proposed — not approved:
+      <one drafted alternative>
+
+      Use this once / Save this mapping / Leave unchanged?
+      ```
+
+      The drafted alternative's wording may vary between agents; the
+      sequence, the single-alternative count, the labels, and the three
+      choices must not. The agent never silently reuses an unapproved draft
       as if it were a mapping, and it never skips the offer.
    "Turn it off" pauses behavior immediately but preserves settings; "turn it
    off and delete my settings" erases everything, including scheduled

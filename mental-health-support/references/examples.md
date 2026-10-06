@@ -69,6 +69,14 @@
 >    *Already-neutral status; shown unchanged. No alternative proposed.*
 > 3. Original: "Interview invitation — Initech, Staff Engineer"
 >    *No sensitive terms detected; shown unchanged.*
+> 4. Original: "Status: ghosted — Hooli, PM"
+>    Detected sensitive term: "ghosted"
+>    No approved mapping is configured.
+>
+>    Proposed — not approved:
+>    Status: No response received — Hooli, PM
+>
+>    Use this once / Save this mapping / Leave unchanged?
 >
 > *Shown with softer wording where applied — originals available. Source changed: false. Details on request.*
 
