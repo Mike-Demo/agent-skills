@@ -23,6 +23,7 @@ openskills install Mike-Demo/agent-skills/jobspipe
 | Skill | Description |
 |---|---|
 | agent-chat-ux | Make agents communicate like great conversationalists: emoji language, status reactions, progress bars, and interactive cards/buttons. |
+| adobe-firefly | Generate or edit images through Adobe Firefly's web app via the live browser on a paid Adobe account. |
 | aikido | Use Aikido security scanning when the user asks to scan code for vulnerabilities or secrets, or to triage Aikido security issues. |
 | application-form-filler | Fill out job application form fields with context-aware, tailored answers drawn from the candidate's CV and the job description. |
 | beautiful-ai | Build Beautiful.ai presentations: list themes/folders/decks, create decks from an outline or template, export to PDF/PPTX. |
