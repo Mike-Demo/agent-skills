@@ -33,6 +33,24 @@ rules. Fixed:
 - Tests: evals 19–21 (suggest digest fidelity, provenance labeling,
   one-time mapping approval). 21 evals total.
 
+## 2026-10-05 — Round 3: close the remaining determinism gaps (revalidation)
+
+Third review found the two Round 2 contradictions substantially fixed, but
+flagged three precise failures and one fuzzy threshold. Fixed:
+
+- Example 3 (plain mode) now uses the required "Agent-generated
+  alternative:" label and offers explicit "use this once / save this
+  mapping" choices instead of the ambiguous "say the word".
+- No-mapping state is now mandatory, not optional: show original with the
+  detected term flagged → "No approved mapping is configured" → exactly one
+  alternative labeled "Proposed — not approved" → offer "Use this once" /
+  "Save this mapping" / "Leave unchanged". No "may draft" loophole.
+- Example 4b no longer invites an alternative for "Withdrawn": already-
+  neutral statuses are shown unchanged with no alternative proposed.
+- Large-batch threshold defined objectively: more than 20 items.
+- Tests: evals 22–23 (mandated no-mapping behavior, already-neutral status
+  in digest). 23 evals total.
+
 ## 2026-10-05 — Spec hardening after external review (Copilot, Think deeper)
 
 Reviewed by an independent model against the spec; fixed every critical finding:

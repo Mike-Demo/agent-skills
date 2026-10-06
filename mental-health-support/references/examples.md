@@ -37,7 +37,12 @@
 
 > Status: Failed — Globex Inc.
 >
-> *Plain mode is on, so I'm keeping the literal wording. A factual equivalent would be: Not selected for this role — say the word if you want it.*
+> *Plain mode is on, so I'm keeping the literal wording.*
+>
+> Agent-generated alternative:
+> Not selected for this role
+>
+> *Proposed — not approved. Want me to use this once, or save it as a mapping?*
 
 ## 4. Summarize-level digest (twice-daily cadence)
 
@@ -61,7 +66,7 @@
 > 1. Original: "Status: Rejected — Acme Corp, Senior PM"
 >    Agent-generated alternative: Status: Not selected for this role — Acme Corp, Senior PM
 > 2. Original: "Status: Withdrawn — Globex Inc, Director"
->    *No approved alternative is configured for "Withdrawn" — say "propose one" if you want a suggestion.*
+>    *Already-neutral status; shown unchanged. No alternative proposed.*
 > 3. Original: "Interview invitation — Initech, Staff Engineer"
 >    *No sensitive terms detected; shown unchanged.*
 >

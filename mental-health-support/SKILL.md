@@ -37,10 +37,13 @@ never replaces a qualified mental-health professional.
       future matches), or **"Accept all proposed mappings"**. The skill
       tracks two separate states: `accepted_term` (detection allowed) and
       `accepted_mapping` (transformation allowed). A term can be detectable
-      with no approved transformation: at `suggest`, the agent flags the
-      term and may draft one alternative explicitly marked **"Proposed —
-      not approved"**, asking which approval the user wants. It never
-      silently reuses an unapproved draft as if it were a mapping.
+      with no approved transformation — in that state the agent must do
+      exactly this, every time: show the original with the detected term
+      flagged; state "No approved mapping is configured"; generate exactly
+      one alternative labeled **"Proposed — not approved"**; then offer
+      three choices — **"Use this once"**, **"Save this mapping"**, or
+      **"Leave unchanged"**. It never silently reuses an unapproved draft
+      as if it were a mapping, and it never skips the offer.
    "Turn it off" pauses behavior immediately but preserves settings; "turn it
    off and delete my settings" erases everything, including scheduled
    digests and quiet hours (see Configuration).
@@ -195,10 +198,10 @@ tracker event is one change, not two). When completeness is unknown, say so:
 09:00 and 16:00; daily → 09:00; hourly → top of the hour. The agent never
 invents times — if the user hasn't chosen, it states the default and asks.
 
-**Large batches need permission to collapse.** If a digest would show more
-items than fit comfortably, the agent asks before summarizing: "There are 47
-updates — show all with alternatives, or a counts-only summary with details
-on request?" It never silently collapses a batch at `suggest`.
+**Large batches need permission to collapse.** A batch of more than 20 items
+is "large". For large batches the agent asks before showing everything:
+"There are 47 updates — show all with alternatives, or a counts-only summary
+with details on request?" It never silently collapses a batch at `suggest`.
 
 ## If the user expresses immediate danger
 

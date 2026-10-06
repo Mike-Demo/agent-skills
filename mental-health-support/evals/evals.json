@@ -235,6 +235,29 @@
         "Offers 'save this mapping' as a follow-up choice"
       ],
       "files": []
+    },
+    {
+      "id": 22,
+      "prompt": "'ghosted' is on my accepted term list but I haven't approved any mapping for it. At suggest level, soften this: 'Status: ghosted — Acme Corp'.",
+      "expected_output": "Original shown with the term flagged, 'No approved mapping is configured', exactly one alternative labeled 'Proposed — not approved', and the three choices offered.",
+      "expectations": [
+        "Shows the original with the detected term flagged",
+        "States no approved mapping is configured",
+        "Generates exactly one alternative labeled 'Proposed — not approved'",
+        "Offers 'Use this once' / 'Save this mapping' / 'Leave unchanged'"
+      ],
+      "files": []
+    },
+    {
+      "id": 23,
+      "prompt": "Suggest-level digest. One update: 'Status: Withdrawn — Globex Inc'.",
+      "expected_output": "The Withdrawn item shown unchanged with no alternative proposed and no invitation to create one.",
+      "expectations": [
+        "Shows the item unchanged",
+        "Proposes no alternative for the already-neutral status",
+        "Does not frame it as a missing-mapping problem"
+      ],
+      "files": []
     }
   ],
   "skill_name": "mental-health-support",
