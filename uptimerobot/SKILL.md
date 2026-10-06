@@ -1,6 +1,6 @@
 ---
 name: "uptimerobot"
-description: "Use UptimeRobot when the user asks about site uptime, monitors, incidents, or status pages."
+description: "Monitor website uptime, incidents, and status pages via the UptimeRobot API. Use when Demo asks about site availability, downtime alerts, monitor status, or status pages."
 ---
 
 # UptimeRobot
@@ -8,7 +8,8 @@ description: "Use UptimeRobot when the user asks about site uptime, monitors, in
 ## Purpose
 Use UptimeRobot with the user-connected `custom.uptimerobot` credential (Main API Key).
 
-Demo has a paid UptimeRobot plan. This skill lets you:
+Demo's UptimeRobot account is on a paid plan (re-check if paid features stop
+working). This skill lets you:
 - list monitors and filter by status (up / down / paused)
 - get monitor details, uptime stats, and response times
 - create, pause, resume, and update monitors
@@ -24,9 +25,10 @@ Examples:
 - `uptimerobot-mcp tools/call getMonitors '{"statuses": [9]}'` (down monitors)
 
 ## Operating Rules
-1. Creating, pausing, deleting, or changing a monitor affects real
-   monitoring — confirm with the user before any write action, and read
-   back the result to verify.
+1. Any write action — creating, pausing, deleting, or changing a monitor,
+   plus edits to monitor groups, maintenance windows, incidents, and status
+   pages — affects real monitoring or public-facing pages. Confirm with the
+   user before any write action, and read back the result to verify.
 2. Read-only checks (status, uptime, response times) need no confirmation.
 3. Never invent monitor state: report only what the tools return.
 

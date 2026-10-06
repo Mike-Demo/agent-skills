@@ -1,6 +1,6 @@
 ---
 name: resume-tailor
-description: Customize resume for specific job postings while maintaining truthfulness. Use when tailoring Demo's resume to a specific job posting.
+description: Customize resume for specific job postings while maintaining truthfulness. Use when tailoring the user's resume to a specific job posting.
 ---
 
 # Resume Tailor
@@ -61,6 +61,10 @@ only for skills the candidate genuinely has
 **Education:** Highlight relevant coursework, certifications
 
 ## Section-by-Section Tailoring Guide
+
+All examples below are **fictional** — invented names, credentials, and
+metrics for illustration only. Never carry an example's specifics into a
+real resume.
 
 ### Professional Summary
 
@@ -206,7 +210,8 @@ read — don't block tailoring on a missing score]
 - Emphasize process improvement
 - Highlight work that scaled
 - Show collaboration across teams
-- Add metrics that show impact at scale
+- Add metrics that show impact at scale — only metrics already present in the
+  source resume or supplied by the user; never invent them
 
 ## Keyword Integration Rules
 
@@ -255,12 +260,15 @@ read — don't block tailoring on a missing score]
 [LastName]_Resume_[TargetRole]_[Company]_[Date].pdf
 
 Examples:
-- Smith_Resume_PM_Google_Jan2024.pdf
-- Smith_Resume_DataAnalyst_Meta_Jan2024.pdf
+- Smith_Resume_PM_Google_[MonthYear].pdf
+- Smith_Resume_DataAnalyst_Meta_[MonthYear].pdf
 - Smith_Resume_General_Master.docx (your master file)
 ```
 
 ## Quick Tailoring Checklist
+
+This skill prepares resumes — it never submits applications. Submission is a
+separate step the user takes themselves.
 
 Before submitting any resume:
 

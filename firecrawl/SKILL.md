@@ -17,6 +17,8 @@ firecrawl scrape https://example.com/menu
 ```
 Search returns title/url/snippet per result (2 credits per search); `--scrape`
 adds markdown content. Scrape returns one page as markdown (onlyMainContent).
+Searches and scrapes spend paid credits — confirm with the user before
+running them, or batch multiple lookups into one confirmed run.
 
 Python CLIs must import `/opt/hatch/skills/skill-creator/bin/dynamic_credentials.py` and call `add_surrogate_to_request(...)`, `url_with_surrogate_query_param(...)`, or `url_with_surrogate_path_segment(...)` before authenticated requests, matching where the provider reads the key. If they use `urllib`, read JSON responses with `read_json_response(resp)` from the same helper instead of calling `resp.read()` directly. They must send only `hsurr:*` values, and only to the hosts below.
 

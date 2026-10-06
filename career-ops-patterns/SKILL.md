@@ -49,8 +49,9 @@ Key output fields: `metadata` (totals, outcomeRates), `funnel`, `scoreComparison
 - **`viaChannelAnalysis` is the channel split-test scoreboard.** `Via` is
   normalized to `Sprout | Jobbie | Manual | Staffing firm | Tracker`. Report
   per-channel advance rate — this is the Sprout-vs-Jobbie-vs-Manual comparison.
-- **`vendorAnalysis`** works from the tracker's `URL` column (only ~10% of rows
-  carry one). Greenhouse/Lever/Ashby/Workday are URL-detectable; everything
+- **`vendorAnalysis`** works from the tracker's `URL` column (only a small
+  share of rows carry one — measure and report the actual coverage each run).
+  Greenhouse/Lever/Ashby/Workday are URL-detectable; everything
   else falls in `unknown`. Always state coverage.
 - **Causal humility is mandatory.** Report channel yield, never discrimination
   or bias claims. "X% of your applications go through {vendor/channel} and it

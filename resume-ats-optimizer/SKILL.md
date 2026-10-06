@@ -26,7 +26,10 @@ Also use when the user provides a resume file and mentions they're applying to j
 
 ## The ATS Problem
 
-75% of resumes are rejected by Applicant Tracking Systems before a human ever sees them. Companies use ATS to:
+A large share of resumes are filtered by Applicant Tracking Systems before a
+human ever sees them (vendor marketing often cites figures like 75% — treat
+any specific percentage as an unverified marketing claim, not a fact).
+Companies use ATS to:
 - Filter out unqualified candidates automatically
 - Search for specific keywords from job requirements
 - Parse resumes into structured data

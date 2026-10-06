@@ -146,6 +146,14 @@ shown) and must be labeled a guess. Response time may only be stated if the
 posting gives a timeline — otherwise write "not stated". Never invent
 applicant counts, timelines, or salary figures.
 
+**The sample report below is entirely fictional.** TechCorp Inc., the salary
+range, the 78% score, the candidate's years of experience, "MBA from UC
+Berkeley", all keyword counts ("5x", "2x", "7 times"), all resume metrics
+("50+ customer interviews", "100K+ users", "35%", "20%"), the interview
+process, and the APPLY verdict are invented for illustration. In a real
+report every one of these must come from the supplied job description and
+resume, or be marked unknown.
+
 ```markdown
 # JOB ANALYSIS REPORT
 
@@ -402,7 +410,8 @@ You meet 80% of required skills and 67% of preferred skills. Your developer tool
 - "You have..."
 - "Essential qualifications"
 - Listed under "Requirements"
-- Mentioned 3+ times in description
+- Mentioned 3+ times in description (heuristic — the employer's explicit
+  labels override mention counts)
 
 **Language indicating PREFERRED:**
 - "Nice to have..."
@@ -448,7 +457,8 @@ When analyzing a job:
 - Flag as potential red flag
 - Extract what keywords you can
 - Recommend reaching out for clarity before applying
-- Use industry standard requirements as baseline
+- Mark missing requirements as unknown — do not score them, and do not
+  fill the gaps with "industry standard" requirements that aren't in the posting
 
 ### Multiple Roles in One JD
 - Identify the core role vs "other duties"

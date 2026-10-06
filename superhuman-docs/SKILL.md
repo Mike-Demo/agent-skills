@@ -20,10 +20,12 @@ CLI: `~/workspace/skills/superhuman-docs/bin/superhuman-docs`
 
 Python CLIs must import `/opt/hatch/skills/skill-creator/bin/dynamic_credentials.py` and call `add_surrogate_to_request(...)`, `url_with_surrogate_query_param(...)`, or `url_with_surrogate_path_segment(...)` before authenticated requests, matching where the provider reads the key. If they use `urllib`, read JSON responses with `read_json_response(resp)` from the same helper instead of calling `resp.read()` directly. They must send only `hsurr:*` values, and only to the hosts below.
 
-## Token scope (verified 2026-09-30)
+## Token scope
+
 The stored token is **scoped** to specific docs (whoami says `"scoped": true`), so
 `GET /docs` returns 403 — the CLI prints a hint for that. Work from a
 `docs.superhuman.com` doc URL or bare doc id instead: `pages <url>` accepts both.
+If the user supplies neither a URL nor a doc ID, ask for one — don't guess.
 Base URL is `https://coda.io/apis/v1` (docs.superhuman.com/apis/v1 hangs from this
 environment). The API is slow (~10s per call through the proxy); a single timeout
 is not an auth failure.

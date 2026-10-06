@@ -35,8 +35,9 @@ Key tools: `get_themes`, `get_folders`, `list_presentations`,
 
 ## Auth
 OAuth via Beautiful.ai (dynamic client, `openid bai` scopes), connected
-2026-09-25 with the user's sign-in. Tokens live in
-`~/workspace/.openai-mcp/oauth.json`; the CLI refreshes the access token
+with the user's sign-in. Tokens live in
+`~/workspace/.openai-mcp/oauth.json` (if the CLI can't find them, re-run
+the connect flow); the CLI refreshes the access token
 automatically. Never print or paste the tokens. If calls start failing with
 auth errors, the connection needs re-doing — ask the user before starting
 any re-auth flow.

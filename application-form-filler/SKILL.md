@@ -29,6 +29,12 @@ Always read:
 
 If the user hasn't provided a CV or JD, ask for them before writing.
 
+**All worked examples in this file are fictional.** Years of experience,
+project names, employers, and technical claims (Screenr, "4 years of React",
+"milliseconds latency") are placeholders to demonstrate shape and tone.
+Every fact in a real answer must come from the candidate's CV or JD — never
+copy an example's specifics into an application.
+
 ## Question Types and How to Handle Each
 
 ---

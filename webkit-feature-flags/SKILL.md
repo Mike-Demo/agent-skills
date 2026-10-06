@@ -9,7 +9,9 @@ A developer reference for Safari's WebKit Feature Flags
 (Settings → Apps → Safari → Advanced → Feature Flags), captured from a real
 iOS 27 device (Safari 27.0, build 20625.1.29). All 220 flags documented with
 their recorded on/off state, what each gates, and whether it is a developer
-feature or an internal engine switch.
+feature or an internal engine switch. Flag states are a snapshot — reverify
+against the installed build before acting on any recorded on/off value,
+especially after OS updates.
 
 ## How to use this skill
 

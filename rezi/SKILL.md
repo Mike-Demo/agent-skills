@@ -8,12 +8,13 @@ description: "Manage Rezi resumes and search Rezi's job board. Use when Demo wan
 ## Purpose
 Use Rezi with the user-connected `custom.rezi` credential.
 
-Demo uses Rezi Pro for tailored CVs. This skill lets you:
+Demo uses Rezi for tailored CVs. This skill lets you:
 - `list_resumes` / `read_resume`: inspect their resumes (master + tailored versions)
 - `get_resume_format`: check editable sections before writing
 - `write_resume`: create a new tailored resume (omit `resume_id`) or update one
 - `search_jobs` / `get_job_details`: search Rezi's job board by role + location
-  (if the search backend returns 500s, retry before reporting it broken)
+  (if the search backend returns 500s, retry once or twice before reporting
+  it broken)
 
 ## CLI
 `bin/rezi-mcp` — `rezi-mcp tools/list`, or

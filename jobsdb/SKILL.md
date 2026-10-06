@@ -1,12 +1,13 @@
 ---
 name: jobsdb
-description: "Free, unlimited manual job search against the public jobs_db Supabase (~178k US jobs). Use for one-off manual searches where you would otherwise spend finite JobsPipe credits; never as a replacement for JobsPipe signals."
+description: "Free, unlimited manual job search against the public jobs_db Supabase (a hiring.cafe scrape of US jobs; row counts change over time). Use for one-off manual searches where you would otherwise spend finite JobsPipe credits; never as a replacement for JobsPipe signals."
 ---
 
 # jobsdb skill
 
 Free, unlimited manual job search against the public jobs_db Supabase
-(DevelopIQ-ai/jobs_db on GitHub — a hiring.cafe scrape, ~178k US jobs).
+(DevelopIQ-ai/jobs_db on GitHub — a hiring.cafe scrape of US jobs; the row
+count changes over time, so don't rely on any specific number).
 Read-only via the published anon key; no signup, no credits.
 
 ## When to use
@@ -15,7 +16,7 @@ Read-only via the published anon key; no signup, no credits.
 - Broad title sweeps (e.g. all "partnerships" titles scraped recently).
 - NEVER as a replacement for JobsPipe signals (instant alerts, ghost-score
   filtering, active-status) and never as a base for automation — the source
-  repo is brand new (created 2026-10-01) and could vanish.
+  repo is new and could vanish.
 
 ## CLI
 
@@ -29,17 +30,18 @@ Read-only via the published anon key; no signup, no credits.
 | `--limit N` | max rows (default 20) |
 | `--remote` | filter workplace_type to remote |
 
-Example:
+Example (`--since` takes a date computed from the requested freshness window —
+e.g. 7 days back for a weekly sweep):
 ```
-bin/jobsdb-search --title "partnerships" --since 2026-09-01 --limit 20
-bin/jobsdb-search --title "alliances" --remote --since 2026-09-15
+bin/jobsdb-search --title "partnerships" --since <YYYY-MM-DD> --limit 20
+bin/jobsdb-search --title "alliances" --remote --since <YYYY-MM-DD>
 ```
 
-## Verified quirks (2026-10-01)
+## Known quirks
 
 - Simple `ilike` + `limit` queries work. Aggregate queries (`count=exact`,
   `order=`) hit statement timeouts — don't use them.
 - `locations` is a JSON array; `workplace_type` is a string ("Remote", "Hybrid", ...).
 - No dedup across re-scrapes beyond `collapse_key`; treat near-duplicates as expected.
-- Always verify a listing is still live by opening its `apply_url` before acting —
-  assume anything scraped >2 weeks ago may be dead.
+- Always verify a listing is still live by opening its `apply_url` before
+  acting — older scrapes are less reliable, so prefer fresh `--since` windows.

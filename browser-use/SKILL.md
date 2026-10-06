@@ -26,13 +26,17 @@ Two flows — pick one per run, don't mix them:
   `--timeout` hits); then fetch `result`.
 - Detached: `run --no-wait` returns a run_id immediately; poll `status` until
   completed/failed/cancelled (or use `wait <run_id>`), then fetch `result`.
-`max-cost` caps spend per run.
+`max-cost` caps spend per run. Confirm with the user before starting a paid
+run — state the task and the max-cost cap. Inside a run, confirm before any
+consequential action: submitting forms, changing account data, publishing,
+or purchasing.
 Model `bu-ultrafast` is the user's pick (`bu-fast` is the cheaper sibling); if the
 API rejects a model name, fall back to a fast v4 model (e.g. gemini-3.5-flash).
 Always pass proxyCountryCode "us"
 (the CLI default) when browserSettings is present.
 
-Python CLIs must import `/opt/hatch/skills/skill-creator/bin/dynamic_credentials.py` and call `add_surrogate_to_request(...)`, `url_with_surrogate_query_param(...)`, or `url_with_surrogate_path_segment(...)` before authenticated requests, matching where the provider reads the key. If they use `urllib`, read JSON responses with `read_json_response(resp)` from the same helper instead of calling `resp.read()` directly. They must send only `hsurr:*` values, and only to the hosts below.
+Python CLIs must import `/opt/hatch/skills/skill-creator/bin/dynamic_credentials.py` and call `add_surrogate_to_request(...)`, `url_with_surrogate_query_param(...)`, or `url_with_surrogate_path_segment(...)` before authenticated requests, matching where the provider reads the key. If they use `urllib`, read JSON responses with `read_json_response(resp)` from the same helper instead of calling `resp.read()` directly. They must send only `hsurr:*` values, and only to the provider's API host
+(`api.browser-use.com`).
 
 ## Auth
 The credential is already stored; nothing here collects one. Never ask the user to paste a raw key in chat, set a secret environment variable, pass a secret flag, or write an auth file.

@@ -27,22 +27,26 @@ Streamable HTTP with the stored credential (used for signals; there is no
 public REST endpoint for them). Example:
 `bin/jobspipe-mcp list_signals '{}'`.
 
-## Signals (live, created 2026-09-30)
-Three signals, all `mode: "jobs"`, email destination `your-email@example.com`,
-cadence `instant`, evaluated continuously at ZERO credit cost:
-- Partnerships Leadership (`59b52841-4a19-4e9e-9703-41800122d558`) — Head/Director/VP of Partnerships titles
-- Alliances Channel Ecosystem (`286d415c-781f-408e-8f73-d6adbadb93e0`) — Alliances/Channel/Ecosystem/BD leadership titles
-- Target Company Watch (`ca86a802-6cd7-45ef-a508-3d9271b07967`) — partnerships-type roles at Fivetran, Databricks, dbt Labs, Confluent, Snowflake, Stripe, HubSpot, Cloudflare, Notion, Airtable
-Common filters: remote US, `employer_type_not: [agency, broker]`,
-`max_ghost_score: 30`, `status: active`. The Daily Job Sweep reads the signal
-alert emails from Outlook and triages them; manual `jobspipe-search` runs are a
-fallback only (one-time credits never refill — check the current balance before running).
+## Signals (standing configuration)
 
-Key limits learned 2026-09-30:
+Three signals, all `mode: "jobs"`, email destination (placeholder), cadence
+`instant`, evaluated continuously at ZERO credit cost:
+- Partnerships Leadership — Head/Director/VP of Partnerships titles
+- Alliances Channel Ecosystem — Alliances/Channel/Ecosystem/BD leadership titles
+- Target Company Watch — partnerships-type roles at Fivetran, Databricks, dbt Labs, Confluent, Snowflake, Stripe, HubSpot, Cloudflare, Notion, Airtable
+Common filters: remote US, `employer_type_not: [agency, broker]`,
+`max_ghost_score: 30`, `status: active`. Verify the live configuration with
+`list_signals` before acting — signal IDs change if signals are recreated.
+The Daily Job Sweep reads the signal alert emails from Outlook and triages
+them; manual `jobspipe-search` runs are a fallback only (one-time credits
+never refill — check the current balance before running).
+
+Key limits:
 - Webhook destinations require a paid plan (builder $49/mo+); free plan is email/Slack only.
 - `create_signal` with a webhook destination fails on free with "Monthly request quota exceeded" (monthly credits = 0 on free).
 - No MCP tools exist to update/pause/delete signals — use the dashboard (saved login for jobspipe.dev in Secure Vault).
-- Signal filters and destinations can't be edited; delete and recreate.
+- Signal filters and destinations can't be edited; delete and recreate —
+  confirm with the user before deleting or recreating a signal.
 
 ## Tooling
 Add service-specific CLIs under `~/workspace/skills/jobspipe/bin/`.

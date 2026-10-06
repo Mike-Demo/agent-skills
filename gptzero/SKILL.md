@@ -6,7 +6,7 @@ description: "Scan text with the GPTZero AI-detection API to check whether draft
 # GPTZero
 
 ## Purpose
-AI-detection scans of drafted text (follow-ups, posts, emails) to verify they read as human-written in Demo's voice
+AI-detection scans of drafted text (follow-ups, posts, emails) to check whether drafts read as human-written in Demo's voice
 
 ## Tooling
 Add service-specific CLIs under `~/workspace/skills/gptzero/bin/`.
@@ -38,9 +38,10 @@ gptzero-scan --file draft.txt --json   # raw API response
 
 Notes:
 - Requires ~250 characters minimum; GPTZero is unstable under ~100 words.
-  Follow-up drafts run under 150 words, so scores are a rough signal, not
-  a verdict. Calibrate first: scan Demo's known-human writing and compare
-  drafts against that baseline rather than against 0.
+  Short drafts (under ~150 words) produce unstable scores, so treat the
+  score as a rough signal, not a verdict. Calibrate first: scan Demo's
+  known-human writing and compare drafts against that baseline rather
+  than against 0.
 - False positives happen (ESL bias documented in the literature; dense
   technical prose inflates scores).
 - `api.gptzero.me` sits behind Cloudflare, which 403s urllib's default

@@ -18,11 +18,14 @@ The credential is already stored; nothing here collects one. Never ask the user 
 
 A 401 or 403 is a question about the request before it is a question about the key. Check that the credential was attached at all: a request built without the helpers named under Tooling carries nothing, and that looks exactly like a wrong or under-scoped token. Only once a request that did carry the credential is still rejected, call `credentials.request_api_access` with `reconnect` to replace it. The connector is stored as `custom.rssapi`.
 
-## Operating strategy (verified 2026-09-30)
+## Operating strategy
 
 - **Subscriptions over parsing.** A subscription is monitored continuously and pushes
-  new items to the webhook (unlimited events on Entry plan). Each manual `get`/parse
-  burns from the 100/month quota — never poll. Subscribe once, let webhooks deliver.
+  new items to the webhook. Each manual `get`/parse burns from the monthly
+  quota (100/month on the Entry plan as of the last check — verify current
+  plan/quotas in the dashboard) — never poll. Subscribe once (confirm with
+  the user first — subscribing writes to the Rssapi account), let webhooks
+  deliver.
 - **`subscribe` requires a real feed URL.** Page URLs are rejected with
   "This is not a valid Feed URL". There is no `detect` endpoint (404). Find feed URLs
   by scanning the page HTML for `<link rel="alternate" type="application/rss+xml">`
@@ -31,8 +34,7 @@ A 401 or 403 is a question about the request before it is a question about the k
   2026-09-30: Partnership Leaders, Lesbians Who Tech, Hitmarker, gamesindustry.biz
   jobs, and 10 target-company career pages (Fivetran, Databricks, dbt Labs, Confluent,
   Snowflake, Stripe, HubSpot, Cloudflare, Notion, Airtable) have no subscribable feed.
-  Only https://outintech.com/jobs/feed/ qualified (subscribed, id 76489; feed was
-  empty at subscribe time — webhooks fire when items appear).
+  Only https://outintech.com/jobs/feed/ qualified (webhooks fire when items appear).
 - **Webhook URL is dashboard-only.** Set once per application in the rssapi.net
   dashboard (the user sets it — no saved dashboard login exists). The webhook
   URL carries a token stored with the job-alerts receiver config; the token
@@ -49,7 +51,8 @@ A 401 or 403 is a question about the request before it is a question about the k
 Active subscriptions live in the Rssapi account, not in this file. The local
 record is `~/workspace/goals/land-a-head-or-director-of-partnerships-role/hidden_files/rssapi-subscriptions.json`
 — re-list via the API before acting and never rely on a committed ID list.
-Current coverage: Out In Tech jobs, Remotive category feeds (sales, marketing,
+If the record file is absent, re-list from the API and rebuild it.
+Current coverage (verify with a fresh list — subscriptions change): Out In Tech jobs, Remotive category feeds (sales, marketing,
 product), We Work Remotely category feeds (sales-and-marketing,
 management-and-finance), WordPress.org jobs. Category feeds only (not the
 Remotive/WWR main firehoses) to keep the push signal clean. The job-feeds

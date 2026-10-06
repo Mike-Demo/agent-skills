@@ -9,7 +9,9 @@ description: "Create and manage branded short links via the Rebrandly API. Use w
 Use Rebrandly with the user-connected `custom.rebrandly` credential to shorten
 URLs into branded links and manage existing ones (list, update, delete).
 Confirm with the user before deleting a link — deleted short links break
-wherever they were shared.
+wherever they were shared. Confirm before changing an existing link's
+destination too — an updated link redirects everywhere it was already
+published.
 
 ## Tooling
 Add service-specific CLIs under `~/workspace/skills/rebrandly/bin/`.

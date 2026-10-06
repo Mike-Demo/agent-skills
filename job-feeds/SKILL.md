@@ -53,7 +53,8 @@ president, svp, evp, chief) and a topic term. Each match is tiered:
 - adjacent: channel, ecosystem, or business development term
   (Demo is open to these related leadership functions).
 Intern/junior/associate/assistant/coordinator titles are excluded. Company is guessed from common
-title formats ("Role at Company", "Company: Role") and may be empty — the
+title formats ("Role at Company", "Company: Role") and may be empty — leave it empty unless the
+parse is unambiguous, and label guessed values as inferred. The
 worker triages with the URL.
 
 Feeds covered: Remotive main + sales/marketing/product categories,
@@ -72,10 +73,11 @@ recent N postings.
 3. **Tailor** — Rezi: `rezi-mcp tools/call write_resume` from the master resume
    + the JD. Confirm with Demo before writing; never invent resume content.
    Rezi also auto-generates cover letters from company + JD.
-4. **Apply** — standing rules: suitable → Sprout import (auto overnight);
-   approved role rejected by Sprout → Cane applies direct without asking;
-   borderline → digest for yay/nay. Stop for unanswerable required questions,
-   unsaved logins (never create accounts unasked), or closed postings.
+4. **Apply** — standing rules (per Demo's standing authorization): suitable →
+   Sprout import (auto overnight); approved role rejected by Sprout → Cane
+   applies direct without asking; borderline → digest for yay/nay. Stop for
+   unanswerable required questions, unsaved logins (never create accounts
+   unasked), or closed postings.
 5. **Track** — log every application to the tracker with channel, timestamp,
    source, and résumé used; re-upload to OneDrive.
 

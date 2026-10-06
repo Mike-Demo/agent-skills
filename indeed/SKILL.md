@@ -1,11 +1,11 @@
 ---
 name: indeed
-description: "Indeed MCP skill — currently BLOCKED: Indeed's MCP server is allowlisted to Claude's own connector clients. Do not use until the block is lifted."
+description: "Indeed MCP skill — BLOCKED as of 2026-10-01: Indeed's MCP server is allowlisted to Claude's own connector clients. Re-check the status before use; do not use until the block is lifted."
 ---
 
 # Indeed MCP skill
 
-## Status: BLOCKED (2026-10-01)
+## Status: BLOCKED (last checked 2026-10-01 — re-verify before relying on this)
 
 Indeed's MCP server (`https://mcp.indeed.com/claude/mcp`) is **allowlisted to
 Claude's own connector clients**. We completed a full valid OAuth 2.0 +
@@ -32,10 +32,13 @@ generic `/mcp` endpoint (404) and no public allowlist process.
 
 If Indeed opens the beta beyond Claude, just run
 `bin/indeed-mcp list-tools` — the CLI refreshes the token itself. If the
-refresh token has expired by then, redo the Safari PKCE loop (see memory
-2026-09-30 for the steps).
+refresh token has expired by then, redo the Safari PKCE loop: open the
+authorization URL in Safari, approve, copy the `?code=` from the redirect,
+and exchange it for tokens (same dynamic-client + PKCE flow as the first
+setup — the CLI holds the client registration).
 
 ## For the user
 
-The only working path today is inside Claude: claude.ai → Search & Tools →
-Add connectors → Indeed → sign in.
+As of the last check, the only working path is inside Claude: claude.ai →
+Search & Tools → Add connectors → Indeed → sign in. Re-check before
+recommending it.

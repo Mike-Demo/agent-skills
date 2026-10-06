@@ -6,7 +6,7 @@ description: "Use Aikido security scanning when the user asks to scan code for v
 # Aikido
 
 ## Purpose
-Aikido's MCP server (`@aikidosec/mcp`, v1.0.25) exposes:
+Aikido's MCP server (`@aikidosec/mcp`) exposes:
 - local SAST / secrets / IaC scans of files on disk (`aikido_scan_paths`)
 - scans of inline file content (`aikido_full_scan`)
 - open-source dependency scans of manifests/lockfiles (`aikido_oss_dependency_scan`)
@@ -22,15 +22,16 @@ GitHub repos.
 `bin/aikido-mcp` — `aikido-mcp tools/list`, or
 `aikido-mcp tools/call <tool> '<json-args>'`.
 The CLI speaks MCP over stdio to `npx -y @aikidosec/mcp` and prints the
-JSON-RPC result object. Verified working 2026-09-26 (tools/list returns all
-10 tools).
+JSON-RPC result object. Last verified working 2026-09-26 (tools/list returned
+all 10 tools) — re-check the version if calls fail.
 
 ## Auth
-The server requires `AIKIDO_API_KEY` in its environment. There is no OS
-keychain on this VM (keytar ships no usable prebuild for it), and the Secure
-Vault cannot inject secrets into local subprocess environments — its
-credential surrogates only attach to HTTPS requests. There is therefore no
-persistent, vault-backed way to authenticate this server.
+The server requires `AIKIDO_API_KEY` in its environment. If no OS keychain
+is available (as on this VM — keytar ships no usable prebuild for it), and
+the Secure Vault cannot inject secrets into local subprocess environments
+(its credential surrogates only attach to HTTPS requests), there is no
+persistent, vault-backed way to authenticate this server — use a transient
+key instead and never store it.
 
 The only supported path is transient, and only when the user explicitly
 chooses it: they generate a Personal Access Token at Aikido → Settings →

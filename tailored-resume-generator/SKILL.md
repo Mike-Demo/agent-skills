@@ -71,6 +71,12 @@ My transferable experience:
 
 ## Example
 
+**The sample below is entirely fictional.** John Doe, the contact details,
+the internship dates, and every duty, audience, and outcome in the generated
+output are invented for illustration. In a real run, every assertion must
+trace to the candidate's supplied background — requirements from the job
+description (like SQL) must never be restated as candidate experience.
+
 **User Request:**
 ```
 I need a tailored resume for this job:
@@ -100,7 +106,7 @@ My background:
 Email: john.doe@email.com | Phone: (555) 123-4567 | LinkedIn: linkedin.com/in/johndoe
 
 ## PROFESSIONAL SUMMARY
-Results-driven Data Analyst with 5+ years of experience leveraging SQL, Python, and advanced
+Results-driven Data Analyst with 5+ years of experience leveraging Python and advanced
 visualization tools to deliver actionable insights. Proven track record in statistical analysis,
 A/B testing, and cross-functional collaboration. Healthcare industry experience with strong
 ability to communicate complex data findings to stakeholders.
@@ -123,10 +129,9 @@ ability to communicate complex data findings to stakeholders.
   operations, and executive leadership
 - Collaborated with the marketing team to analyze customer behavior patterns
 
-**Data Analysis Intern** | HealthPlus Clinic | 2018 - 2019
-- Supported healthcare analytics initiatives by analyzing patient data and operational metrics
-- Gained exposure to healthcare industry data management and HIPAA compliance requirements
-- Assisted in creating reports for clinical staff to improve patient care workflows
+**Data Analysis Intern** | HealthPlus Clinic | one-year internship
+- Supported healthcare analytics initiatives
+- Assisted in creating reports for clinical staff
 
 ## EDUCATION
 
@@ -217,7 +222,9 @@ For each job requirement:
 **Professional Experience**:
 - For each role, emphasize responsibilities and achievements aligned with job requirements
 - Use action verbs: Led, Developed, Implemented, Optimized, Managed, Created, Analyzed
-- **Quantify achievements**: Include numbers, percentages, timeframes, scale
+- **Quantify achievements**: Include numbers, percentages, timeframes, scale —
+  only with metrics the candidate supplied or that are substantiated by their
+  background; never invent them
 - Reorder bullet points to prioritize most relevant experience
 - Use keywords naturally from job description
 - Format: **[Action Verb] + [What] + [How/Why] + [Result/Impact]**
@@ -292,7 +299,8 @@ Ask if user wants to:
 **Do**:
 - Be truthful and accurate - never fabricate experience
 - Use industry-standard terminology
-- Quantify achievements with specific metrics
+- Quantify achievements with specific metrics — only where the candidate
+  provided them; describe scope and method where they didn't
 - Tailor each resume to specific job
 - Proofread for grammar and consistency
 - Keep language concise and impactful

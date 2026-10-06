@@ -24,6 +24,15 @@ Use AFTER analyzing job description to have clear talking points.
 - Structure persuasive arguments for candidacy
 - Maintain authenticity while selling effectively
 
+## Missing inputs
+
+- No job description: ask for it, or work from the role title + company only
+  and keep claims generic — never invent requirements.
+- No resume: ask for one. Don't generate a letter from a job description
+  alone; there is nothing truthful to personalize it with.
+- No company research available: say so in the research notes and write the
+  letter without company-specific claims rather than inventing them.
+
 ## Cover Letter Philosophy
 
 **The Problem:** Most cover letters are generic, boring, and add no value beyond the resume.
@@ -58,6 +67,15 @@ Closing Paragraph: Call to action + enthusiasm (2-3 sentences)
 [Professional Sign-off]
 ```
 
+## A note on the examples below
+
+Every example in this file is **fictional**. Names (Sarah Chen), companies
+(TechCorp), and all numbers ("3 years", "8 products", "0 to 100K users",
+"40%", "$2M", "5 years") are placeholders. When generating a real cover
+letter, replace each bracketed placeholder with a verified fact from the
+candidate's resume or research — never carry an example's specifics into a
+user's letter.
+
 ## Opening Paragraph Strategies
 
 The opening is critical - you have 5 seconds to grab attention.
@@ -66,27 +84,27 @@ The opening is critical - you have 5 seconds to grab attention.
 
 **1. Specific Company Knowledge**
 ```
-"I was excited to see TechCorp's recent launch of your API marketplace - as a Product Manager who's spent 3 years building developer tools, I immediately saw how my experience could accelerate your platform growth."
+"I was excited to see [Company]'s [recent launch or news from your research] - as a Product Manager who's spent [N] years building developer tools, I immediately saw how my experience could accelerate your platform growth."
 ```
 
 **2. Mutual Connection**
 ```
-"Sarah Chen on your engineering team mentioned you're looking for a PM to lead the payments initiative. Having worked with Sarah at [Previous Company] and led payment integrations at [Current Company], I'd love to discuss how I could contribute."
+"[Connection's name] on your engineering team mentioned you're looking for a PM to lead the payments initiative. Having worked with [Name] at [Previous Company] and led payment integrations at [Current Company], I'd love to discuss how I could contribute."
 ```
 
 **3. Problem-Solver**
 ```
-"Your job description mentions the challenge of aligning technical and business stakeholders - I've navigated this exact challenge, successfully launching 8 products by building shared roadmap visibility across engineering, sales, and executive teams."
+"Your job description mentions the challenge of aligning technical and business stakeholders - I've navigated this exact challenge, successfully launching [N] products by building shared roadmap visibility across engineering, sales, and executive teams."
 ```
 
 **4. Impressive Achievement**
 ```
-"Last year, I led a product that grew from 0 to 100K users in 6 months. I'm excited about the opportunity to bring that growth mindset to [Company]'s expanding product line."
+"Last year, I led a product that grew from [X] to [Y] users in [timeframe]. I'm excited about the opportunity to bring that growth mindset to [Company]'s expanding product line."
 ```
 
 **5. Industry Insight**
 ```
-"The B2B payments space is at an inflection point, and [Company]'s approach to embedded finance positions you perfectly for the next wave. As someone who's been building in fintech for 5 years, I'd love to contribute to that growth."
+"The [industry] space is at an inflection point, and [Company]'s approach to [specific strategy from your research] positions you perfectly for the next wave. As someone who's been building in [industry] for [N] years, I'd love to contribute to that growth."
 ```
 
 ### Opening Don'ts
@@ -104,7 +122,7 @@ Connect your strongest experience to their top requirement.
 **Formula:** [Their Need] + [Your Exact Experience] + [Specific Result]
 
 ```
-Your focus on data-driven product decisions aligns perfectly with my approach. At [Company], I implemented a product analytics framework that increased feature adoption by 40% by identifying and prioritizing high-impact opportunities through A/B testing and user behavior analysis.
+Your focus on data-driven product decisions aligns perfectly with my approach. At [Company], I implemented a product analytics framework that increased feature adoption by [X]% by identifying and prioritizing high-impact opportunities through A/B testing and user behavior analysis.
 ```
 
 ### Body Paragraph 2: Broader Value + Gap Handling
@@ -113,7 +131,7 @@ Show additional value and proactively address concerns.
 
 **If you have gaps, address them:**
 ```
-While my SQL experience is developing (currently completing DataCamp's SQL track), I bring strong analytical skills demonstrated through building Tableau dashboards that informed $2M in strategic decisions. I've consistently collaborated effectively with data teams and have a track record of quickly ramping on new tools.
+While my SQL experience is developing (currently completing [course or program]), I bring strong analytical skills demonstrated through building [dashboard/report] that informed [$ amount or scope] in strategic decisions. I've consistently collaborated effectively with data teams and have a track record of quickly ramping on new tools.
 ```
 
 **If no gaps, add more value:**

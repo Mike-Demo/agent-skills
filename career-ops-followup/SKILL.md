@@ -33,6 +33,8 @@ points come from verified facts only — the application-answers memory and
    ```bash
    python3 ~/workspace/career-ops/sync-tracker.py
    ```
+   If the script is missing or fails, stop and report it — don't work from
+   a stale mirror or guess application state.
 2. Run everything below from `PROJECT_ROOT`.
 
 ## Step 1 — Cadence check
@@ -40,6 +42,9 @@ points come from verified facts only — the application-answers memory and
 ```bash
 cd ~/workspace/career-ops && node followup-cadence.mjs
 ```
+
+If the command is missing, exits non-zero, or returns malformed JSON, stop
+and report it — don't invent cadence data.
 
 Parse the JSON: `metadata` (tracked, actionable, overdue/urgent/cold/waiting),
 `entries` (per application: company, role, status, days since applied,
