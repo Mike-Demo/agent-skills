@@ -19,7 +19,10 @@ Use AFTER job-description-analyzer to know what to emphasize.
 
 - Reorder experience sections by relevance to target role
 - Adjust professional summary for specific position
-- Add missing keywords from job description
+- Add keywords from the job description only where they describe real,
+  substantiated experience — never add a skill or tool the candidate has not
+  used. A keyword the candidate can't back up in an interview goes in the
+  gap list, not on the resume.
 - Modify bullet points to match job requirements
 - Maintain authenticity while optimizing match
 - Create multiple targeted resume versions
@@ -47,7 +50,8 @@ For each section, ask:
 
 **Professional Summary:** Rewrite to mirror the job's key requirements
 
-**Skills Section:** Reorder to put most relevant skills first, add missing keywords
+**Skills Section:** Reorder to put most relevant skills first; add JD keywords
+only for skills the candidate genuinely has
 
 **Experience:** 
 - Reorder jobs if a less recent role is more relevant
@@ -123,7 +127,9 @@ Incorporate job description keywords while staying truthful.
 
 **Job Description Says:** "stakeholder management"
 **Your Bullet Says:** "Worked with various teams"
-**Tailored Version:** "Managed stakeholder relationships across 5 departments, ensuring alignment on project priorities"
+**Tailored Version:** "Coordinated across multiple teams to keep project
+priorities aligned" — sharper phrasing, same facts. Never invent specifics
+the original bullet doesn't support (no "5 departments", no made-up metrics).
 
 ## Tailoring Templates
 
@@ -134,7 +140,8 @@ Incorporate job description keywords while staying truthful.
 
 **Target Position:** [Job Title]
 **Company:** [Company Name]
-**Match Score:** [From JD Analyzer]
+**Match Score:** [from JD Analyzer if available; otherwise a qualitative fit
+read — don't block tailoring on a missing score]
 
 ### Summary Customization
 **Current:** [Your current summary]
@@ -297,10 +304,12 @@ When tailoring a resume, provide:
 [Repeat for each relevant job]
 
 ### Overall Changes Summary
-- Keywords added: X
+- Keywords added: X (all substantiated by real experience — unverifiable JD
+  keywords go in the gap list, not on the resume)
 - Bullets modified: Y
 - Sections reordered: Yes/No
-- Estimated new match score: Z%
+- Estimated new match score: Z% (rough keyword-overlap estimate, same method
+  as the analyzer's Step 3 — label it an estimate, not a measured result)
 ```
 
 ## Implementation Notes

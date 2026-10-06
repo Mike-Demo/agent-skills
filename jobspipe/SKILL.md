@@ -1,6 +1,6 @@
 ---
 name: "jobspipe"
-description: "Use Jobspipe when the user asks for Jobspipe or this provider's API."
+description: "Search jobs via the JobsPipe API and manage live job-signal alerts. Use when running a manual job search or checking signal configuration for Demo's partnerships hunt."
 ---
 
 # Jobspipe
@@ -36,7 +36,7 @@ cadence `instant`, evaluated continuously at ZERO credit cost:
 Common filters: remote US, `employer_type_not: [agency, broker]`,
 `max_ghost_score: 30`, `status: active`. The Daily Job Sweep reads the signal
 alert emails from Outlook and triages them; manual `jobspipe-search` runs are a
-fallback only (one-time credits never refill — 635 left as of 2026-09-30).
+fallback only (one-time credits never refill — check the current balance before running).
 
 Key limits learned 2026-09-30:
 - Webhook destinations require a paid plan (builder $49/mo+); free plan is email/Slack only.

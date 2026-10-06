@@ -106,7 +106,11 @@ For each keyword in job description:
 3. Count frequency of mention
 4. Note location (summary, experience, skills)
 
-### Step 3: Calculate Match Score
+### Step 3: Calculate Match Score (keyword-overlap heuristic)
+
+This is a rough keyword-overlap estimate computed by hand — not a real ATS
+score. Real applicant tracking systems use proprietary ranking; treat this
+number as a directional gauge only and always label it an estimate.
 
 ```
 Match Score = (Keywords Matched / Total Required Keywords) × 100
@@ -114,9 +118,9 @@ Match Score = (Keywords Matched / Total Required Keywords) × 100
 Example:
 Job has 20 required keywords
 Your resume has 15 of them
-Match Score = 75%
+Match Score ≈ 75% (estimated)
 
-Target: 80%+ for strong match
+Rule of thumb: aim for roughly 80%+ keyword overlap for a strong match.
 ```
 
 ### Step 4: Keyword Placement Strategy
@@ -176,12 +180,18 @@ JOB REQUIREMENTS vs YOUR RESUME:
 ⚠️  "Risk management" - You have "risk mitigation" (close but not exact match)
 ✅ Process improvement - Found 2x
 
-**Match Score: 65%**
-Target: 80%+ recommended
+**Match Score: ≈65%** (estimated keyword overlap — see Step 3)
+Rule of thumb: roughly 80%+ overlap recommended
 
 ### Recommended Changes
 
-**1. Add Missing Keywords:**
+**1. Add Missing Keywords — only where truthful:**
+
+Only add a keyword the candidate can substantiate. "Stakeholder management"
+and "budget management" are missing from the resume — if the candidate has
+done that work, add it in their own words; if not, it goes in the gap list,
+not on the resume. Never invent scope ("3 departments") or figures ("$2.5M")
+to fill a keyword gap.
 
 In Professional Summary, change:
 "Experienced project manager with proven track record..."
@@ -189,9 +199,9 @@ In Professional Summary, change:
 To:
 "Experienced project manager with proven track record in stakeholder management and budget oversight..."
 
-In Experience section, add bullet:
-"Managed stakeholder communication across 3 departments and executive leadership team"
-"Directed budget management for $2.5M project portfolio"
+In Experience section, add a bullet only if the candidate actually did the work,
+in their own words and numbers (e.g. "Coordinated stakeholder communication
+across project teams" — never invent department counts or dollar figures).
 
 **2. Fix Formatting:**
 - Move contact information from header to body of resume
@@ -200,7 +210,8 @@ In Experience section, add bullet:
 **3. Strengthen Existing Keywords:**
 Change "risk mitigation" to "risk management" for exact match
 
-### Estimated New Match Score: 85%
+### Estimated New Match Score: ≈85% (rough estimate after the changes above —
+label it as such, never as a measured ATS result)
 ```
 
 ## Common ATS Failure Patterns

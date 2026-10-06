@@ -24,9 +24,9 @@ generic `/mcp` endpoint (404) and no public allowlist process.
 
 - `bin/indeed-mcp` — CLI (list-tools, search, details, resume, company).
   Works end-to-end *except* the server rejects our client_id.
-- `.indeed-tokens.json` (mode 600) — valid Indeed OAuth tokens for our
-  registered client (`0ef01059…`), all four job_seeker scopes, auto-refresh
-  in the CLI.
+- Valid Indeed OAuth tokens for the registered client (`0ef01059…`), all four
+  job_seeker scopes, held in local credential storage (mode 600) — never
+  committed to the repo. The CLI auto-refreshes.
 
 ## How to retry
 

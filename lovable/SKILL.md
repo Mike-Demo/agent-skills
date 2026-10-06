@@ -46,9 +46,3 @@ looks exactly like a wrong or under-scoped token. Only once a request that
 did carry the credential is still rejected, reconnect the `custom.lovable`
 connector. Restrict authenticated requests to: mcp.lovable.dev.
 Do not print, log, or persist raw credentials.
-
-## Operating Rules
-1. Use this skill when the user asks about Lovable projects or publishing.
-2. Restrict authenticated requests to: mcp.lovable.dev.
-3. Do not print, log, or persist raw credentials.
-4. If auth is missing or rejected, follow the Auth section rather than asking for a token.

@@ -38,6 +38,15 @@ The path is relative to `https://api.github.com`. Send `Accept: application/vnd.
 - Search code: `github-api GET /search/code -q 'q=query+repo:OWNER/REPO' --paginate`
 - Workflows/runs: `github-api GET /repos/OWNER/REPO/actions/runs --paginate`
 
+## Write operations — confirmation rules
+
+Reads (GET) need no confirmation. Any POST, PUT, PATCH, or DELETE must be
+confirmed with the user first, showing the exact repo, endpoint, and payload.
+Extra care on third-party repos: verify the signed-in account (`GET /user`)
+before opening issues or PRs, and never post from the wrong account. If a
+write returns no confirmation, check for the receipt (the created resource)
+before retrying — never resubmit blindly.
+
 ## Notes
 
 - The token's scopes decide what's possible; a 403/404 on a repo usually means the token lacks access (fine-grained tokens are per-repo).

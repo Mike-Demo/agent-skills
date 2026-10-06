@@ -13,7 +13,7 @@ metadata:
 All repo-relative paths resolve to the career-ops checkout:
 
 ```
-PROJECT_ROOT=/home/hatch/workspace/career-ops
+PROJECT_ROOT=~/workspace/career-ops
 ```
 
 Full mode reference: `modes/followup.md` in that checkout. User-layer context:
@@ -31,14 +31,14 @@ points come from verified facts only — the application-answers memory and
 
 1. Regenerate the tracker mirror:
    ```bash
-   python3 /home/hatch/workspace/career-ops/sync-tracker.py
+   python3 ~/workspace/career-ops/sync-tracker.py
    ```
 2. Run everything below from `PROJECT_ROOT`.
 
 ## Step 1 — Cadence check
 
 ```bash
-cd /home/hatch/workspace/career-ops && node followup-cadence.mjs
+cd ~/workspace/career-ops && node followup-cadence.mjs
 ```
 
 Parse the JSON: `metadata` (tracked, actionable, overdue/urgent/cold/waiting),

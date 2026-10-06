@@ -1,6 +1,6 @@
 ---
 name: "superhuman_docs"
-description: "Use Superhuman Docs when the user asks for Superhuman Docs or this provider's API."
+description: "Read Superhuman (Coda-backed) docs, pages, and tables via API. Use when Demo wants content, tables, or rows pulled from a docs.superhuman.com document."
 ---
 
 # Superhuman Docs

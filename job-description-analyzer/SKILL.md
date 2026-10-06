@@ -140,6 +140,12 @@ Scan for warning signs:
 
 ## Match Score Output Format
 
+**Evidence rule:** every estimate in the report must cite its basis. Competition
+level may only be guessed from stated facts (posting age, applicant count if
+shown) and must be labeled a guess. Response time may only be stated if the
+posting gives a timeline — otherwise write "not stated". Never invent
+applicant counts, timelines, or salary figures.
+
 ```markdown
 # JOB ANALYSIS REPORT
 
@@ -155,7 +161,8 @@ Scan for warning signs:
 **Recommendation:** STRONG FIT - Apply within 48 hours
 
 **Application Priority:** HIGH
-**Estimated Competition:** Medium (Posted 2 days ago)
+**Estimated Competition:** Medium — rough guess from posting age (2 days) only;
+label it a guess, never a fact
 **Time to Tailor Resume:** 30-45 minutes
 
 ═══════════════════════════════════════════
@@ -349,7 +356,9 @@ Before applying, check:
 **✅ Week 1:**
 - Follow up if no response after 7 days
 
-**📊 Expected Response Time:** 1-2 weeks
+**📊 Expected Response Time:** unknown unless the posting states a timeline —
+never invent one. If the posting gives a process or timeline, cite it;
+otherwise say "not stated".
 
 **📊 Interview Process (from job posting):**
 1. Recruiter screen (30 min)

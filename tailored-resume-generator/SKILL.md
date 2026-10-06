@@ -114,16 +114,14 @@ ability to communicate complex data findings to stakeholders.
 ## PROFESSIONAL EXPERIENCE
 
 **Data Analyst** | RetailCo | 2019 - 2024
-- Designed and implemented 50+ SQL queries and Python automation scripts, reducing manual
-  data processing time by 60%
-- Conducted rigorous A/B testing and statistical analysis for marketing campaigns,
-  improving campaign ROI by 35%
-- Built interactive Tableau and Power BI dashboards for executive team, enabling
-  data-driven decision making
+- Built Python scripts to automate recurring data-processing and reporting tasks
+- Ran A/B tests and statistical analysis on marketing campaigns to measure lift
+  and inform targeting decisions
+- Built interactive Tableau and Power BI dashboards for the executive team,
+  enabling data-driven decision making
 - Presented analytical findings to cross-functional stakeholders including marketing,
   operations, and executive leadership
-- Collaborated with marketing team to analyze customer behavior patterns and optimize
-  targeting strategies
+- Collaborated with the marketing team to analyze customer behavior patterns
 
 **Data Analysis Intern** | HealthPlus Clinic | 2018 - 2019
 - Supported healthcare analytics initiatives by analyzing patient data and operational metrics
@@ -136,9 +134,9 @@ ability to communicate complex data findings to stakeholders.
 State University | Graduated 2018
 
 ## KEY ACHIEVEMENTS
-- Reduced data processing time by 60% through Python automation
-- Improved marketing campaign ROI by 35% through A/B testing and optimization
-- Created data visualization system now used across entire organization
+- Automated recurring data-processing workflows with Python scripting
+- Delivered campaign performance analyses that informed marketing decisions
+- Created data visualization system adopted by stakeholders across the organization
 ```
 
 **Additional Recommendations:**
@@ -148,6 +146,16 @@ State University | Graduated 2018
 - Consider mentioning any familiarity with healthcare regulations (HIPAA, etc.)
 
 ---
+
+## Truthfulness rule
+
+Never invent numbers, dates, employers, titles, or credentials. Metrics in the
+output must come from the candidate's own background material — where the
+candidate gave no metric, describe scope and method instead of inventing one
+("automated recurring reporting with Python", not "cut reporting time 40%").
+If a job requirement can't be met from the candidate's history, name the gap
+in the recommendations instead of filling it. This rule applies to examples
+too: sample outputs must only contain facts present in the sample input.
 
 ## Instructions
 

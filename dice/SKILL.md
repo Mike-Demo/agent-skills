@@ -51,6 +51,8 @@ None. The Dice MCP server is public and requires no key, login, or session.
    `companyPageUrl` per job, plus this disclosure: "These job listings were
    found using AI-powered search. Please review all job details carefully
    and verify information directly with employers before applying."
+   If a result has no `detailsPageUrl` or `companyPageUrl`, say the link is
+   unavailable — never invent or guess a URL.
 4. Don't fetch details for every result — only for jobs the user picks.
 5. Known quirk (2026-09-30): the server sometimes closes the SSE stream
    without a chunk terminator. The CLI reads with `requests` streaming and

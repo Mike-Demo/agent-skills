@@ -73,7 +73,7 @@ specific project or context]. [Optional: secondary tools in the same category].
 - Must be specific to this company — no boilerplate
 - Research the company before answering if needed
 - Connect to real work, not aspirations
-- Keep it under 150 words for a form field
+- Length: short answer — see Length Calibration
 - Don't repeat the JD back to them
 
 ---
@@ -143,7 +143,7 @@ Optional: one project or side work that's relevant (1 sentence).
 
 **Rules:**
 - Start with current role, not education
-- Keep to 100-200 words for most form fields
+- Length: "Tell us about yourself" row in Length Calibration
 - End on the forward-looking note (what you want, not where you've been)
 - No trait statements ("I'm passionate about...") — just facts and projects
 
@@ -166,7 +166,7 @@ with a metric if possible — 1 sentence].
 **Rules:**
 - Be specific — name the project, the tech, the team size
 - Don't generalize ("I always approach problems by...")
-- Keep to 150-250 words
+- Length: "Describe your experience" row in Length Calibration
 - First-person, active voice throughout
 - End with the result, not the lesson learned (save that for interviews)
 
@@ -185,7 +185,7 @@ Answer with a genuine opinion. Pick one or two things and explain the reasoning 
 **Rules:**
 - Have an actual point of view — vague answers are forgettable
 - Ground opinions in domain knowledge or real experience
-- Keep to 100-150 words
+- Length: "Opinion / perspective" row in Length Calibration
 - Don't hedge everything — commit to a view, acknowledge it's one perspective
 
 ---
@@ -220,6 +220,7 @@ system, and several client projects. Also used Next.js where SSR was needed.
 | Long answer / textarea | 100-250 words |
 | "Describe your experience" | 150-300 words |
 | "Tell us about yourself" | 100-200 words |
+| Opinion / perspective question | 100-150 words |
 | Portfolio / links section | List format, no prose |
 
 When in doubt, shorter is better. Recruiters skim form answers. The goal is to be clear and memorable, not comprehensive.

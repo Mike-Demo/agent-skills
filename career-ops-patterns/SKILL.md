@@ -13,7 +13,7 @@ metadata:
 All repo-relative paths resolve to the career-ops checkout:
 
 ```
-PROJECT_ROOT=/home/hatch/workspace/career-ops
+PROJECT_ROOT=~/workspace/career-ops
 ```
 
 Full mode reference: `modes/patterns.md` in that checkout. User-layer context:
@@ -24,14 +24,14 @@ Full mode reference: `modes/patterns.md` in that checkout. User-layer context:
 1. Regenerate the tracker mirror (the xlsx in `~/workspace/master-tracker/` is
    canonical; the markdown mirror is derived and must never be hand-edited):
    ```bash
-   python3 /home/hatch/workspace/career-ops/sync-tracker.py
+   python3 ~/workspace/career-ops/sync-tracker.py
    ```
 2. Run everything below from `PROJECT_ROOT`.
 
 ## Step 1 — Run the analysis
 
 ```bash
-cd /home/hatch/workspace/career-ops && node analyze-patterns.mjs --summary
+cd ~/workspace/career-ops && node analyze-patterns.mjs --summary
 ```
 
 Minimum threshold: at least 5 sent rows (Applied/Responded/Interview/Offer/

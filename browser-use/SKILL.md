@@ -1,12 +1,15 @@
 ---
 name: "browser_use"
-description: "Use Browser Use when the user asks for Browser Use or this provider's API."
+description: "Run hosted browser agents via the Browser Use Cloud API for web research, page interaction, and form or site checks that need a real browser session. Use when the user asks for a Browser Use cloud agent run."
 ---
 
 # Browser Use
 
 ## Purpose
-Use Browser Use with the user-connected `custom.browser-use` credential.
+Use Browser Use with the user-connected `custom.browser-use` credential to run
+hosted browser agents: give a task, get back structured page results. For
+plain page-text reads, prefer `browser.open`; use this skill when the task
+needs interaction (clicks, forms, logins, multi-step flows).
 
 ## Tooling
 `bin/browser-use` — CLI for the Browser Use Cloud API v4 (hosted agents):
@@ -18,8 +21,12 @@ browser-use status <run_id>                   # cheap poll
 browser-use result <run_id>                   # full result JSON
 browser-use wait <run_id> [--timeout 1800]    # poll then print result
 ```
-Create with `run` (it waits by default); poll `status` until
-completed/failed/cancelled, then fetch `result`. `max-cost` caps spend per run.
+Two flows — pick one per run, don't mix them:
+- Blocking: `run` waits by default and returns when the run finishes (or
+  `--timeout` hits); then fetch `result`.
+- Detached: `run --no-wait` returns a run_id immediately; poll `status` until
+  completed/failed/cancelled (or use `wait <run_id>`), then fetch `result`.
+`max-cost` caps spend per run.
 Model `bu-ultrafast` is the user's pick (`bu-fast` is the cheaper sibling); if the
 API rejects a model name, fall back to a fast v4 model (e.g. gemini-3.5-flash).
 Always pass proxyCountryCode "us"
@@ -32,8 +39,3 @@ The credential is already stored; nothing here collects one. Never ask the user 
 
 A 401 or 403 is a question about the request before it is a question about the key. Check that the credential was attached at all: a request built without the helpers named under Tooling carries nothing, and that looks exactly like a wrong or under-scoped token. Only once a request that did carry the credential is still rejected, call `credentials.request_api_access` with `reconnect` to replace it. The connector is stored as `custom.browser-use`.
 
-## Operating Rules
-1. Use this skill when the user asks for Browser Use or this provider's API.
-2. Restrict authenticated requests to: api.browser-use.com.
-3. Do not print, log, or persist raw credentials.
-4. If auth is missing or rejected, follow the Auth section rather than asking for a key.

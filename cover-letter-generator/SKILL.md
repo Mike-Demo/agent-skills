@@ -236,7 +236,8 @@ When generating a cover letter, provide:
 # COVER LETTER FOR [POSITION] AT [COMPANY]
 
 ## Analysis Summary
-- Match Score: [From JD Analyzer]
+- Match Score: [from JD Analyzer if available; otherwise give a qualitative
+  fit read — never block generation on a missing score]
 - Key Strengths to Highlight: [List]
 - Gaps to Address: [List or "None"]
 - Company Research Notes: [Key facts to reference]
@@ -268,7 +269,9 @@ Before delivering any cover letter:
 1. ✅ Opens with a hook (not "I am writing to apply")
 2. ✅ Mentions specific company knowledge
 3. ✅ Connects experience directly to job requirements
-4. ✅ Includes at least one specific metric/achievement
+4. ✅ Includes at least one specific metric/achievement from the candidate's own
+   background — if none was provided, anchor on scope and method instead of
+   inventing numbers
 5. ✅ Addresses any obvious gaps (if applicable)
 6. ✅ Has confident but not arrogant tone
 7. ✅ Ends with clear call to action

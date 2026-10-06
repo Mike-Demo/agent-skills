@@ -1,6 +1,6 @@
 ---
 name: "rssapi"
-description: "Use Rssapi when the user asks for Rssapi or this provider's API."
+description: "Monitor RSS and job-board feeds via Rssapi webhook push subscriptions. Use when subscribing to feed URLs so new items push to a webhook (instead of polling a monthly quota), or when managing those subscriptions."
 ---
 
 # Rssapi
@@ -18,12 +18,6 @@ The credential is already stored; nothing here collects one. Never ask the user 
 
 A 401 or 403 is a question about the request before it is a question about the key. Check that the credential was attached at all: a request built without the helpers named under Tooling carries nothing, and that looks exactly like a wrong or under-scoped token. Only once a request that did carry the credential is still rejected, call `credentials.request_api_access` with `reconnect` to replace it. The connector is stored as `custom.rssapi`.
 
-## Operating Rules
-1. Use this skill when the user asks for Rssapi or this provider's API.
-2. Restrict authenticated requests to: api.rssapi.net.
-3. Do not print, log, or persist raw credentials.
-4. If auth is missing or rejected, follow the Auth section rather than asking for a key.
-
 ## Operating strategy (verified 2026-09-30)
 
 - **Subscriptions over parsing.** A subscription is monitored continuously and pushes
@@ -40,28 +34,24 @@ A 401 or 403 is a question about the request before it is a question about the k
   Only https://outintech.com/jobs/feed/ qualified (subscribed, id 76489; feed was
   empty at subscribe time — webhooks fire when items appear).
 - **Webhook URL is dashboard-only.** Set once per application in the rssapi.net
-  dashboard to `https://job-alerts.view.fast/api/hooks/rssapi?token=<RSSAPI_HOOK_TOKEN>`
-  (token in `~/workspace/goals/land-a-head-or-director-of-partnerships-role/hidden_files/job-alerts-tokens.json`,
-  URL-encoded — the token contains `?`, `/`, `=`, `:` so it must be percent-encoded
-  in the query string). No saved rssapi.net dashboard login exists; the user sets it.
+  dashboard (the user sets it — no saved dashboard login exists). The webhook
+  URL carries a token stored with the job-alerts receiver config; the token
+  contains `?`, `/`, `=`, `:` so it must be percent-encoded in the query
+  string.
 - **24h webhook logs** in the dashboard are the recovery window if the receiver
   misses a push.
 - **Do not duplicate** Remotive / We Work Remotely — the job-feeds skill scans those
   free. The 10 target companies are covered by the JobsPipe "Target Company Watch"
   instant-email signal instead.
-- Subscription record: `~/workspace/goals/land-a-head-or-director-of-partnerships-role/hidden_files/rssapi-subscriptions.json`.
 
-## Current subscriptions (2026-09-30, 6 of 25 used)
+## Subscriptions
 
-- 76489 Out In Tech jobs — https://outintech.com/jobs/feed/
-- 76490 Remotive sales — https://remotive.com/remote-jobs/feed/sales
-- 76491 Remotive marketing — https://remotive.com/remote-jobs/feed/marketing
-- 76492 Remotive product — https://remotive.com/remote-jobs/feed/product
-- 76493 WWR sales and marketing — https://weworkremotely.com/categories/remote-sales-and-marketing-jobs.rss
-- 76494 WWR management and finance — https://weworkremotely.com/categories/remote-management-and-finance-jobs.rss
-Category feeds only (not the Remotive/WWR main firehoses) to keep the push
-signal clean. Webhook URL set on the "Job Search Dashboard Staging" application
-(id 657) 2026-09-30; pushes land in the job-alerts receiver and the Daily Job
-Sweep triages them. The job-feeds skill's bin/rss-scan covers the same feeds
-and stays as a manual fallback — the sweep does not run it while webhooks live.
-- 76495 WordPress.org jobs — https://jobs.wordpress.net/feed/
+Active subscriptions live in the Rssapi account, not in this file. The local
+record is `~/workspace/goals/land-a-head-or-director-of-partnerships-role/hidden_files/rssapi-subscriptions.json`
+— re-list via the API before acting and never rely on a committed ID list.
+Current coverage: Out In Tech jobs, Remotive category feeds (sales, marketing,
+product), We Work Remotely category feeds (sales-and-marketing,
+management-and-finance), WordPress.org jobs. Category feeds only (not the
+Remotive/WWR main firehoses) to keep the push signal clean. The job-feeds
+skill's bin/rss-scan covers the same feeds and stays as a manual fallback —
+the sweep does not run it while webhooks live.

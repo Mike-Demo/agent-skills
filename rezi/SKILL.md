@@ -1,6 +1,6 @@
 ---
 name: "rezi"
-description: "Use Rezi when the user asks for Rezi or this provider's API."
+description: "Manage Rezi resumes and search Rezi's job board. Use when Demo wants to inspect, tailor, or write a resume in their Rezi account, or search Rezi jobs by role and location."
 ---
 
 # Rezi
@@ -13,8 +13,7 @@ Demo uses Rezi Pro for tailored CVs. This skill lets you:
 - `get_resume_format`: check editable sections before writing
 - `write_resume`: create a new tailored resume (omit `resume_id`) or update one
 - `search_jobs` / `get_job_details`: search Rezi's job board by role + location
-  (note: Rezi's search backend returned 500s on 2026-09-25; retry before
-  reporting it broken)
+  (if the search backend returns 500s, retry before reporting it broken)
 
 ## CLI
 `bin/rezi-mcp` — `rezi-mcp tools/list`, or
@@ -41,9 +40,3 @@ CLIs must use authd or shared connector helpers for authenticated requests. They
 The credential is already stored; nothing here collects one. Never ask the user to paste a raw key in chat, set a secret environment variable, pass a secret flag, or write an auth file.
 
 A 401 or 403 is a question about the request before it is a question about the key. Check that the credential was attached at all: a request built without the helpers named under Tooling carries nothing, and that looks exactly like a wrong or under-scoped token. Only once a request that did carry the credential is still rejected, call `credentials.request_api_access` with `reconnect` to replace it. The connector is stored as `custom.rezi`.
-
-## Operating Rules
-1. Use this skill when the user asks for Rezi or this provider's API.
-2. Restrict authenticated requests to: api.rezi.ai.
-3. Do not print, log, or persist raw credentials.
-4. If auth is missing or rejected, follow the Auth section rather than asking for a key.

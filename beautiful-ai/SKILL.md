@@ -6,9 +6,11 @@ description: "Build Beautiful.ai presentations: list themes/folders/decks, creat
 # Beautiful.ai
 
 ## Purpose
-Demo's Beautiful.ai account, via the `openai-mcp` MCP server. Use when the
-user asks for a slide deck, presentation, or to work with their Beautiful.ai
-presentations, themes, or templates.
+Demo's Beautiful.ai account, via the `openai-mcp` MCP server. Use this skill
+only when the user wants to work with Beautiful.ai specifically — its
+presentations, themes, or templates. A generic "build me a slide deck"
+request does not imply Beautiful.ai; ask which tool they want unless they
+named it.
 
 ## CLI
 `bin/beautiful-mcp` — `beautiful-mcp tools/list`, or

@@ -15,8 +15,9 @@ Manual OAuth 2.0 + PKCE flow completed 2026-10-01 (the Secure Vault hosted
 flow can't do it — it demands a Client ID and rejects DCR-registered ones;
 same failure as 2026-09-29). Dynamic client registration at
 `https://clerk.getclera.com/oauth/register` (use **curl**, not urllib —
-urllib gets RemoteDisconnected). Tokens in `.clera-tokens.json` (mode 600),
-scopes `profile email offline_access`; the CLI auto-refreshes.
+urllib gets RemoteDisconnected). Tokens held in local credential storage
+(mode 600, never committed to the repo), scopes `profile email offline_access`;
+the CLI auto-refreshes.
 
 ## CLI: bin/clera-mcp
 
