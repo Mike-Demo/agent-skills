@@ -51,6 +51,7 @@ openskills install Mike-Demo/agent-skills/jobspipe
 | superhuman-docs | Use Superhuman Docs when the user asks for Superhuman Docs or this provider's API. |
 | tailored-resume-generator | Analyzes job descriptions and generates tailored resumes that highlight relevant experience, skills, and achievements. |
 | uptimerobot | Use UptimeRobot when the user asks about site uptime, monitors, incidents, or status pages. |
+| webkit-feature-flags | Safari WebKit Feature Flags (iOS/iPadOS 27): which flag gates which web feature, when to enable it, and which flags are internal engine switches to leave alone. Use when a developer asks which feature flag to toggle, what a flag does, or whether a flag is safe to change. |
 
 ## Attribution
 
