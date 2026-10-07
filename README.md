@@ -34,6 +34,7 @@ openskills install Mike-Demo/agent-skills/jobspipe
 | cover-letter-generator | Create personalized, compelling cover letters from resume and job description. |
 | dice | Search tech jobs on Dice via its public MCP server (mcp.dice.com/mcp). |
 | firecrawl | Use Firecrawl when the user asks for Firecrawl or this provider's API. |
+| firefly-first | Cost-saving router: try Adobe Firefly's web app first (free/unlimited on the paid Adobe account) before billable Pexo video generation. |
 | github | Work with GitHub through the REST API (api.github.com) via a generic CLI proxy. |
 | gptzero | Scan text with the GPTZero AI-detection API to check whether drafts read as human-written. |
 | indeed | Indeed MCP skill — currently blocked: Indeed's MCP server is allowlisted to Claude's own connector clients. |
