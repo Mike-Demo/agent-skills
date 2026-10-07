@@ -44,6 +44,7 @@ openskills install Mike-Demo/agent-skills/jobspipe
 | jobspipe | Use Jobspipe when the user asks for Jobspipe or this provider's API. |
 | lovable | Use Lovable when the user asks about Lovable projects, deployments, or publishing. |
 | mental-health-support | Soften harsh wording in draining workflows (opt-in): neutral alternatives, notification batching, quiet hours; includes a job-search mode for status labels and digest summaries. |
+| microsoft-copilot-content-transformer | Use Microsoft Copilot in a controlled web browser to summarize, rewrite, compare, structure, or extract actions from user-supplied content. Returns a review-ready draft and audit record; never searches unrelated M365 content or takes consequential actions. |
 | partnerships-career | Career strategy for experienced partnerships leaders across channel/alliance, affiliate, influencer/creator, and referral. |
 | rebrandly | Use Rebrandly when the user asks for Rebrandly or this provider's API. |
 | resume-ats-optimizer | Optimize resumes for Applicant Tracking Systems, check ATS compatibility, and analyze keyword match. |
