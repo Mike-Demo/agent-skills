@@ -1,0 +1,163 @@
+{
+  "boltSlidesVersion": 1,
+  "boltSlidesId": "11011050-f9d6-4d43-8a9e-3e43af51bbaf",
+  "deck": {
+    "title": "Agent Skills",
+    "transition": "fade",
+    "font": "space",
+    "accent": "#a3e635"
+  },
+  "slides": [
+    {
+      "id": "s1",
+      "position": 0,
+      "layout": "cover",
+      "props": {
+        "kicker": "github.com/Mike-Demo/agent-skills",
+        "title": "Teach your agent ==once.== It knows ==forever.==",
+        "subtitle": "Agent Skills — a library of reusable skills that give AI agents new workflows.",
+        "foot": "Open source · 2026"
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "Hook: every team re-teaches their agent the same tricks. This is the fix — a library of skills agents can load on demand.",
+      "status": "none"
+    },
+    {
+      "id": "s2",
+      "position": 1,
+      "layout": "statement",
+      "props": {
+        "kicker": "The problem",
+        "title": "Every session starts from ==zero.==",
+        "body": "The same hard-won workflows, conventions, and lessons get re-explained, re-derived — or lost between conversations."
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "Land the pain: expertise lives in people, not in the agent. Every new chat pays the same tax.",
+      "status": "none"
+    },
+    {
+      "id": "s3",
+      "position": 2,
+      "layout": "code",
+      "props": {
+        "kicker": "The idea",
+        "title": "A skill is a ==playbook== that travels.",
+        "filename": "SKILL.md",
+        "highlight": "evals",
+        "code": "---\nname: release-checklist\ndescription: Ship a release without missing a step\n---\n\n# Release checklist\n\n1. Run the full test suite\n2. Update the changelog\n3. Tag the commit\n4. Announce it\n\n## Evals\n- Agent ships a tagged release with changelog intact"
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "One self-contained file: instructions, examples, evals. The agent loads it when a task matches — expertise compounds instead of evaporating.",
+      "status": "none"
+    },
+    {
+      "id": "s4",
+      "position": 3,
+      "layout": "steps",
+      "props": {
+        "kicker": "How it works",
+        "title": "Load, follow, improve.",
+        "items": [
+          { "title": "Discover", "body": "The agent finds a skill whose description matches the task." },
+          { "title": "Load", "body": "The playbook enters the session — only when it's needed." },
+          { "title": "Follow", "body": "It works the steps, examples, and evals." },
+          { "title": "Improve", "body": "What the run taught you folds back into the skill." }
+        ]
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "A loop, not a one-shot: every run makes the skill sharper for the next one.",
+      "status": "none"
+    },
+    {
+      "id": "s5",
+      "position": 4,
+      "layout": "chat",
+      "props": {
+        "kicker": "Inside the library",
+        "title": "==agent-chat-ux== — agents that talk like people.",
+        "name": "Agent",
+        "messages": [
+          { "from": "user", "text": "Add a sign-up flow to the app." },
+          { "from": "ai", "text": "On it — building the sign-up flow now." },
+          { "from": "ai", "text": "[progress] 80% — form validated, wiring the database" },
+          { "from": "ai", "text": "Two ways to verify email:\n1. Magic link — frictionless\n2. Six-digit code — familiar\n\nWhich do you prefer?" }
+        ]
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "This skill swaps walls of text for status reactions, progress bars, and interactive choice cards — communication as a first-class skill.",
+      "status": "none"
+    },
+    {
+      "id": "s6",
+      "position": 5,
+      "layout": "bento",
+      "props": {
+        "kicker": "The library",
+        "title": "Why it sticks.",
+        "tiles": [
+          { "title": "Self-contained", "body": "One folder per skill — instructions, examples, and evals travel together.", "c": 3, "variant": "accent" },
+          { "title": "Loaded on demand", "body": "Skills enter the session only when the task matches, keeping context lean.", "c": 3 },
+          { "title": "Improves with use", "body": "Every run can feed its lessons back into the playbook.", "c": 3 },
+          { "title": "Composable", "body": "Skills build on each other — from chat etiquette to full workflows.", "c": 3 }
+        ]
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "The design constraints that make skills durable rather than prompt snippets.",
+      "status": "none"
+    },
+    {
+      "id": "s7",
+      "position": 6,
+      "layout": "pillars",
+      "props": {
+        "title": "Built in the open.",
+        "items": [
+          { "title": "Growing", "body": "A library that expands with every real project it touches." },
+          { "title": "Open source", "body": "Free to use, fork, and contribute — on GitHub today." },
+          { "title": "Battle-tested", "body": "Extracted from real project work, not theory." }
+        ]
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "Status: early but real — every skill comes from work we actually shipped.",
+      "status": "none"
+    },
+    {
+      "id": "s8",
+      "position": 7,
+      "layout": "cover",
+      "props": {
+        "kicker": "Agent Skills",
+        "title": "Teach it ==once.== It knows ==forever.==",
+        "subtitle": "Star, fork, and add the skill your agent is missing.",
+        "foot": "github.com/Mike-Demo/agent-skills"
+      },
+      "background": { "type": "color", "color": "var(--bg)" },
+      "animation": "cascade",
+      "transition": null,
+      "nav": null,
+      "notes": "Close with the ask: one star, one contribution — teach the library something new.",
+      "status": "none"
+    }
+  ]
+}

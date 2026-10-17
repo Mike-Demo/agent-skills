@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "firecrawl": {
+      "enabled": true
+    }
+  }
+}
