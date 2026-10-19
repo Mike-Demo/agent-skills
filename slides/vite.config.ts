@@ -54,6 +54,22 @@ function deckFilePlugin(): Plugin {
           return;
         }
 
+        /* Browsers attach Origin to cross-site POSTs; a webpage open in the
+           developer's browser must not be able to rewrite deck.json. */
+        const origin = req.headers.origin;
+
+        if (origin) {
+          try {
+            if (new URL(origin).host !== req.headers.host) {
+              sendJson(res, 403, { error: 'cross-origin' });
+              return;
+            }
+          } catch {
+            sendJson(res, 403, { error: 'bad-origin' });
+            return;
+          }
+        }
+
         try {
           const raw = JSON.parse(await readBody(req as IncomingMessage));
           if (!raw || typeof raw !== 'object') {
